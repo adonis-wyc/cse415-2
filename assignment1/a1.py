@@ -7,6 +7,7 @@ def four_x_cubed_plus_1(x):
     return 4 * x**3 + 1
 
 print(four_x_cubed_plus_1(2))
+print(four_x_cubed_plus_1(5))
 
 alphabet = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
 def mystery_code(str, shift):
@@ -25,6 +26,7 @@ def mystery_code(str, shift):
     return "".join(ret_str)
 
 print(mystery_code("abc Iz th1s Secure? n0, no, 9!", 17))
+print(mystery_code("abc Iz th1s Secure? n0, no, 9!", 15))
 
 def quintuples(arr):
     ret_arrs = []
@@ -35,6 +37,7 @@ def quintuples(arr):
     return ret_arrs
 
 print(quintuples([2, 5, 1.5, 100, 3, 8, 7, 1, 1, 0, -2, -5]))
+print(quintuples([2, 5, 1.5, 100, 3, 8, 7, 1, 1, 0, -2, -5, 1, 4, 5]))
 
 irregular = {
     "have": "had",
@@ -65,3 +68,4 @@ def past_tense(words):
     return past
 
 print(past_tense(['program', 'debug', 'execute', 'crash', 'repeat', 'eat']))
+print(past_tense(['guess', 'debug', 'return', 'finish']))
