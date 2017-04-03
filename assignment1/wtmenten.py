@@ -9,6 +9,8 @@ import nltk
 from random import choice
 import operator
 
+nltk.download('punkt')
+
 punctuation_pattern = compile(r"\,|\.|\?|\!|\;|\:")
 positive_adj = ["funny", 'good', 'great', 'hilarious', 'amazing', 'wonderful', 'incredible', 'comical',]
 negative_adj = ['terrible', 'bad', 'horrible', 'poor', 'weak', 'shitty']
@@ -92,7 +94,7 @@ I know %s and %s jokes.
     # decorates the response with the agents name
     def respond(self, input):
         response = self.agent_name+": "
-        return response + self._respond(input)
+        return self._respond(input)
 
     # does the actual responding
     def _respond(self, input):
