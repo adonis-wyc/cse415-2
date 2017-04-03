@@ -69,6 +69,7 @@ class Jokester():
     current_category = "random"
     saved_jokes = []
     last_action = None
+    last_category = None
     silences = -1
     inappropriate_cycle = 0
     learned_preferences = {}
@@ -209,10 +210,15 @@ I know %s and %s jokes.
             if input.lower().replace("a","").replace("h","") == "":  # ahahahah
                 sentiment = 2
                 return self.record_sentiment(sentiment)
-            # catch
-            return "Sorry, I didn't catch that."
-        # catch
-        return "Sorry, I didn't catch that."
+
+        # 17. catchall, this rule thows a random joke
+        self.last_category = self.current_category
+        self.current_category = choice(list(categories.keys()))
+        random_joke = self.do_joke()
+        self.last_action = 'random'
+
+        # return choice(["Sorry, I didn't catch that.",random_joke])
+        return random_joke
 
     # this function does the sentiment recording and picks which response to give
     def record_sentiment(self, sentiment):
@@ -223,9 +229,10 @@ I know %s and %s jokes.
             self.learned_preferences[self.current_category] += sentiment
         else:
             self.learned_preferences[self.current_category] = sentiment
+        if self.last_action == 'random' and sentiment < 0:
+            self.current_category = self.last_category
 
         self.last_action = "sentiment"
-
         if sentiment > 0:
             return choice(["I appreciate that.", "Thank you, thank you."])
         elif sentiment < 0:
