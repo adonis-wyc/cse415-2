@@ -2,11 +2,14 @@
 # This program runs a dialog between two agents, which must be defined
 # elsewhere as separate modules.
 
-import Shrink3 as agentA
-import Hearnone as agentB
-N_TURNS = 5
+import grahamtk
+import wtmenten
+N_TURNS = 10
 
 turn = 0
+agentB = grahamtk.CrazyJoe()
+agentA = wtmenten.Jokester()
+
 print(str(turn)+"A: "+agentA.agentName() + ': ' + agentA.introduce()+"\n")
 print(str(turn)+"B: "+agentB.agentName() + ': ' + agentB.introduce()+"\n")
 remark = "Good morning."

@@ -10,6 +10,7 @@ from random import choice
 import operator
 
 nltk.download('punkt')
+nltk.download('averaged_perceptron_tagger')
 
 punctuation_pattern = compile(r"\,|\.|\?|\!|\;|\:")
 positive_adj = ["funny", 'good', 'great', 'hilarious', 'amazing', 'wonderful', 'incredible', 'comical',]
