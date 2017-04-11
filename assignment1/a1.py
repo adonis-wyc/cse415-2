@@ -6,6 +6,7 @@
 def four_x_cubed_plus_1(x):
     return 4 * x**3 + 1
 
+print(four_x_cubed_plus_1(1))
 print(four_x_cubed_plus_1(2))
 print(four_x_cubed_plus_1(5))
 
@@ -25,8 +26,9 @@ def mystery_code(str, shift):
         ret_str.append(new_char)
     return "".join(ret_str)
 
+print(mystery_code("abc Iz th1s Secure? n0, no, 9!", 13))
 print(mystery_code("abc Iz th1s Secure? n0, no, 9!", 17))
-print(mystery_code("abc Iz th1s Secure? n0, no, 9!", 15))
+print(mystery_code("abc Iz th1s Secure? n0, no, 9!", 20))
 
 def quintuples(arr):
     ret_arrs = []
@@ -36,6 +38,7 @@ def quintuples(arr):
         pointer += 5
     return ret_arrs
 
+print(quintuples([2, 5, 1.5, 100, 3, 8, 7, 1, 1]))
 print(quintuples([2, 5, 1.5, 100, 3, 8, 7, 1, 1, 0, -2, -5]))
 print(quintuples([2, 5, 1.5, 100, 3, 8, 7, 1, 1, 0, -2, -5, 1, 4, 5]))
 
@@ -43,7 +46,8 @@ irregular = {
     "have": "had",
     "be": "been",
     "eat": "ate",
-    "go": "gone"
+    "go": "gone",
+    "fall": "fell"
 }
 vowels = ['a','e','i','o','u']
 odd_consonants = ['y','w']
@@ -56,7 +60,8 @@ def past_tense(words):
             if word[-1] == 'e':
                 word += "d"
             elif word[-1] == 'y':
-                word[:-1] += "ied"
+                word = word[:-1]
+                word += "ied"
             elif word[-2] in vowels \
                     and word[-3] not in vowels \
                     and word[-1] not in vowels \
@@ -67,5 +72,6 @@ def past_tense(words):
             past.append(word)
     return past
 
-print(past_tense(['program', 'debug', 'execute', 'crash', 'repeat', 'eat']))
 print(past_tense(['guess', 'debug', 'return', 'finish']))
+print(past_tense(['program', 'debug', 'execute', 'crash', 'repeat', 'eat']))
+print(past_tense(['program', 'debug', 'execute', 'crash', 'repeat', 'eat', 'fly', 'fall', 'vomit']))

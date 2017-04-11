@@ -1,0 +1,44 @@
+William Menten-Weil
+Assignment 2
+4/11/17
+
+Part 1
+
+3.
+(b) A parrot is a bird.
+
+Parrot ⊆ Bird
+
+(c) Polly is a parrot.
+
+Polly ∈ Parrot
+
+(d) David Jones is a Jones.
+
+David Jones ∈ Jones
+
+(e) “George Washington” is a great name.
+
+“George Washington” ∈ great name
+
+(f) Artificial intelligence is a state of mind.
+
+    This statement is confusing because it might not be representing an inclusion.
+    However if it is, then Artificial intelligence ⊆ state of mind
+
+4.
+(a) {(a, a)}
+Reflexive and Antisymmetric
+
+(b) {(a, b), (a, c), (b, c)}
+Transitive
+
+(c) {(a, a), (a, b), (b, b), (b, c), (a, c), (c, c)}
+Reflexive and Transitive
+
+(d) {(a, b), (b, c)}
+Transitive
+
+(e) {}
+Partial Order
+
