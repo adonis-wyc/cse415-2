@@ -28,6 +28,8 @@ from re import *   # Loads the regular expression module.
 ISA = {}
 INCLUDES = {}
 ARTICLES = {}
+
+# storage for alias pointers
 ALIAS = {}
 
 def store_isa_fact(category1, category2):
@@ -44,6 +46,7 @@ def store_isa_fact(category1, category2):
     except KeyError :
         INCLUDES[category2] = [category1]
 
+# removes a fact (c1,c2)
 def remove_isa_fact(category1, category2):
     ISA[category1].remove(category2)
     INCLUDES[category2].remove(category1)
@@ -113,12 +116,15 @@ def process(info) :
         items = result_match_object.groups()
         store_article(items[1], items[0])
         store_article(items[3], items[2])
+
+        # checks for aliases and swaps them for their primary
         a = items[1]
         b = items[3]
         if a in ALIAS:
             a = ALIAS[a]
         if b in ALIAS:
             b = ALIAS[b]
+
         if b in get_isa_list(a):
             print("You told me that earlier.")
         elif isa_test(a, b):
@@ -134,10 +140,15 @@ def process(info) :
     result_match_object = query_pattern.match(info)
     if result_match_object != None :
         items = result_match_object.groups()
+
+        # checks for aliases and swaps them for their primary
+        a = items[1]
+        if a in ALIAS:
+            a = ALIAS[a]
         b = items[3]
         if b in ALIAS:
             b = ALIAS[b]
-        answer = isa_test(items[1], b)
+        answer = isa_test(a, b)
         if answer :
             print("Yes, it is.")
         else :
@@ -198,13 +209,13 @@ def report_chain(x, y):
     chain = find_chain(x, y)
     all_but_last = chain[0:-1]
     last_link = chain[-1]
-    if len(chain) == 1:
+    if len(chain) == 1: # edge case for only one link
         main_phrase = reduce(lambda x, y: x + y, map(report_link, chain))
         last_phrase = ""
     else:
         main_phrase = reduce(lambda x, y: x + y, map(report_link, all_but_last))
         last_phrase = "and " + report_link(last_link)
-    if given_alias in ALIAS:
+    if given_alias in ALIAS: # adds the cycle explanation to the answer
         new_last_phrase = last_phrase + "and %s is another name for %s." % (given_alias, y)
     else:
         new_last_phrase = last_phrase[0:-2] + '.'
@@ -270,6 +281,7 @@ def test() :
 import itertools
 import copy
 
+# gets all elements in tree (INCLUDES or ISA) which are associated with a given item
 def get_list_recursive(item, search_list, max_depth = 20):
     flatten = lambda l: [item for sublist in l for item in sublist]
 
@@ -292,6 +304,7 @@ def get_list_recursive(item, search_list, max_depth = 20):
         # print("key %s not found" % item)
         return []
 
+# find transitive duplications which are about to be created as the result of the next association
 def find_transitive_dupes(items):
     dupes = []
     a = items [1]
@@ -317,6 +330,7 @@ def find_transitive_dupes(items):
         store_isa_fact(a, b)
         return True
 
+# finds and processes cycles which would be created by the next assoication
 def detect_cycle(items):
     if (isa_test(items[3], items[1])):
         chains = find_chain(items[3], items[1])
@@ -334,6 +348,8 @@ def detect_cycle(items):
         return True
     else:
         return False
+
+# updates the pointer for an alias. if that alias is being pointed to then it is replaced with the new primary
 def update_aliases(alias, primary):
     for (k, v) in ALIAS.items():
         if v == alias:
