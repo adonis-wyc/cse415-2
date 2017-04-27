@@ -29,12 +29,17 @@ It is designed to work according to the QUIET tools interface, Version 1.
 import copy
 import math
 import itertools
+import statistics
 
 #<COMMON_DATA>
 POVERTY_LEVEL = 35000
 MIN_WAGE = 27000
 INITIAL_POP_SIZE = 1000
 INFLATION = 0.018
+# MAX_TAX = .55
+MAX_TAX = .45
+MIN_TAX = .05
+TAX_RET_RATE = .1
 #</COMMON_DATA>
 
 #<COMMON_CODE>
@@ -45,9 +50,13 @@ def can_adj_tax(s,i,delta):
     for bracket index = i
     by value = delta'''
   b_value_index = 1
-
+  proposed_tax = s.b[i][b_value_index] + delta
   # will the cutoff/taxrate stay above 0?
-  if s.b[i][b_value_index] + delta <= 0:
+  # print(s.b)
+  # print(i)
+  # print(s.b[i])
+
+  if proposed_tax > MAX_TAX or proposed_tax < MIN_TAX:
     return False # tax rate cannot fall below 0
 
   # now test if shifting by delta will invalidate the order of the brackets
@@ -69,8 +78,7 @@ def can_adj_cutoff(s,i,delta):
     for bracket index = i
     by value = delta'''
   b_value_index = 0
-
-  if s.b[i][b_value_index] + delta <= 0:
+  if s.b[i][b_value_index] + delta <= 0 or i == len(s.b)-1:
     return False # cutoff cannot fall below 0
 
   target_b = s.b[i][b_value_index] + delta
@@ -89,7 +97,6 @@ def can_adj_cutoff(s,i,delta):
 
 def adj_tax(s, i, delta):
   new_s = s.__copy__()
-  print(new_s.p[0])
   new_s.b[i][1] += delta
   return advance(new_s)
 
@@ -100,7 +107,6 @@ def adj_cutoff(s, i, delta):
 
 # progresses a year in the state
 def advance(s):
-  s = s.__copy__()
   taxes = 0
   for i, p in enumerate(s.p):
     unfound = True
@@ -110,12 +116,14 @@ def advance(s):
       if p <= cut:
         taxes += p * rate
         s.p[i] *= (1 + INFLATION)
-        s.p[i] *= (1 -  rate)
+        # s.p[i] *= (1 -  rate)
         unfound = False
       else:
         current_bracket += 1
 
-  per_p_subsidy = taxes / len(s.p)
+  s = grow_wages(s)
+
+  per_p_subsidy = taxes * TAX_RET_RATE / len(s.p)
 
   # print("Taxes: %s" % taxes)
   # print("Tax Return Per P: %s" % per_p_subsidy)
@@ -123,6 +131,19 @@ def advance(s):
       s.p[i] += per_p_subsidy
   return s
 
+def grow_wages(s):
+  avg_wage = sum(s.p) / float(len(s.p))
+  std = statistics.stdev(s.p)
+  std_dist = lambda w, avg=avg_wage, std=std : abs((w - avg) / std)
+  s.p = [ w * (1 + growth_func(std_dist(w))) for w in s.p]
+  return s
+
+def growth_func(x):
+  growth_dynamic = .10
+  growth_const = 0.03
+  sigmoid_value = 1/(1+math.e**(-x/2))
+  framed = ( sigmoid_value * growth_dynamic) + growth_const
+  return framed
 
 def goal_test(s):
   '''If the state matches the sorted list it is a goal state'''
@@ -147,16 +168,18 @@ def h_hamming(state):
   "Counts the number of people below the poverty line."
   count = 0
   for i,p in enumerate(state.p):
+    # if p < POVERTY_LEVEL: count += 1
     if p < POVERTY_LEVEL: count += 1
 
-  return count + bracket_tax_dif(state)
+  return count + bracket_tax_dif(state) * 100
 
 def bracket_tax_dif(s):
   b_val_idx = 1
   difs = []
   for i in range(len(s.b)-1):
-    difs.append(s.b[i+1][b_val_idx] - s.b[i][b_val_idx])
-  return sum(difs) / float(len(difs))
+    difs.append((s.b[i+1][b_val_idx] - s.b[i][b_val_idx]))
+  avg_dif = sum(difs) / float(len(difs))
+  return avg_dif
 
 # def h_euclidean(state):
 #   import math
@@ -193,8 +216,8 @@ def bracket_tax_dif(s):
 #<STATE>
 class State():
   def __init__(self, p, b):
-    self.p = copy.copy(p)
-    self.b = copy.copy(b)
+    self.p = p
+    self.b = b
 
   def __str__(self):
     # Produces a brief textual description of a state.
@@ -212,14 +235,14 @@ class State():
     # Performs an appropriately deep copy of a state,
     # for use by operators in creating new states.
     news = State([],[])
-    news.p, news.b = [copy.deepcopy(t) for t in self.p], [copy.deepcopy(t) for t in self.b]
+    news.p, news.b = [t for t in self.p], [copy.copy(t) for t in self.b]
     return news
 #</STATE>
 
 #<INITIAL_STATE>
 
 INITAL_POPULATION = [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 50000, 55000, 63000, 72000]
-INITAL_TAX_BRACKETS = [[11000, .0], [20000, .10], [35000, .11], [50000, .12], [75000, .15], [100000, .16], [math.inf, .17]]
+INITAL_TAX_BRACKETS = [[11000, .0], [25000, .6], [35000, .9], [50000, .12], [75000, .15], [100000, .16], [math.inf, .17]]
 INITIAL_STATE = State(
     INITAL_POPULATION,
     INITAL_TAX_BRACKETS
@@ -228,23 +251,18 @@ CREATE_INITIAL_STATE = lambda: INITIAL_STATE
 #</INITIAL_STATE>
 
 #<OPERATORS>
+tax_deltas = [ 0.01,]
+cutoff_deltas = [1000,]
+directions = [-1, 1]
 
 OPERATORS = [
   [
-    Operator("Increase Cutoff", lambda s: can_adj_cutoff(s, i, 1000), lambda s: adj_cutoff(s,i, 1000))
-    for i in range(len(INITAL_TAX_BRACKETS))
+    Operator("Change cutoff by %.2f for bracket %s" % (delta * direction, i), lambda s, i=i, delta=delta, direction=direction: can_adj_cutoff(s, i, delta * direction), lambda s, i=i, delta=delta, direction=direction: adj_cutoff(s,i, delta * direction))
+    for delta,direction,i in itertools.product(cutoff_deltas, directions, range(len(INITAL_TAX_BRACKETS)))
   ],
   [
-    Operator("Decrease Cutoff", lambda s: can_adj_cutoff(s, i, -1000), lambda s: adj_cutoff(s,i, -1000))
-    for i in range(len(INITAL_TAX_BRACKETS))
-  ],
-  [
-    Operator("Increase Tax Rate", lambda s: can_adj_tax(s, i, 0.01), lambda s: adj_tax(s,i, 0.01))
-    for i in range(len(INITAL_TAX_BRACKETS))
-  ],
-  [
-    Operator("Decrease Tax Rate", lambda s: can_adj_tax(s, i, -0.01), lambda s: adj_tax(s,i, -0.01))
-    for i in range(len(INITAL_TAX_BRACKETS))
+    Operator("Change tax rate by %.2f for bracket %s" % (delta * direction, i), lambda s, i=i, delta=delta, direction=direction: can_adj_tax(s, i, delta * direction), lambda s, i=i, delta=delta, direction=direction: adj_tax(s,i, delta * direction))
+    for delta,direction,i in itertools.product(tax_deltas, directions, range(len(INITAL_TAX_BRACKETS)))
   ],
 ]
 OPERATORS = list(itertools.chain(*OPERATORS))
