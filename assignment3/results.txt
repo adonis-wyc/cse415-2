@@ -1,0 +1,17 @@
+puzzle, heuristic, successful, states processed
+puzzle10a.py, h_manhattan, True, 57
+puzzle10a.py, h_hamming, True, 80
+puzzle10a.py, h_euclidean, True, 56
+puzzle10a.py, h_custom, True, 64
+puzzle12a.py, h_manhattan, True, 145
+puzzle12a.py, h_hamming, True, 252
+puzzle12a.py, h_euclidean, True, 168
+puzzle12a.py, h_custom, True, 181
+puzzle14a.py, h_manhattan, True, 355
+puzzle14a.py, h_hamming, True, 658
+puzzle14a.py, h_euclidean, True, 356
+puzzle14a.py, h_custom, True, 431
+puzzle16a.py, h_manhattan, True, 444
+puzzle16a.py, h_hamming, True, 986
+puzzle16a.py, h_euclidean, True, 535
+puzzle16a.py, h_custom, True, 613

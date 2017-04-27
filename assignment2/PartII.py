@@ -283,25 +283,19 @@ import copy
 
 # gets all elements in tree (INCLUDES or ISA) which are associated with a given item
 def get_list_recursive(item, search_list, max_depth = 20):
-    flatten = lambda l: [item for sublist in l for item in sublist]
-
     if item in search_list and max_depth > 0:
-        # print("search for %s" % item)
         c1list =  copy.copy(search_list[item])
         c2list = []
         for x in c1list:
-            # print("recursing into %s" % x)
             sub_item = get_list_recursive(x, search_list, max_depth=max_depth-1)
             if len(sub_item) != 0:
                 for i in sub_item:
                     c2list.append(i)
-
         if len(c2list) != 0:
             for i in c2list:
                 c1list.append(i)
         return c1list
     else:
-        # print("key %s not found" % item)
         return []
 
 # find transitive duplications which are about to be created as the result of the next association
