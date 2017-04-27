@@ -1,0 +1,33 @@
+William Menten-Weil
+Assignment 3
+4/17/17
+
+Part 1
+
+1. How many distinct states are possible in a game of Tic-Tac-Toe after 5 moves have been made (3 Xs and 2 Os)?
+
+    9 choose 3 * 6 choose 2
+    1260 distinct states
+
+2. Let us define the game of Tri-Tac-Toe as a game for 3 players, X, Y, and Z. The object is to get 3 in a row. However, they play on a 3D board that is 3 by 3 by 3. Give an expression for the number of distinct states that can be achieved after 6 moves and evaluate it to a number.
+
+    27 choose 2 * 25 choose 2 * 23 choose 2
+    26640900 distinct states
+
+3.  distinct patterns in a 2k x 2k (even number of dimensions)
+    def distinct_patterns(k):
+        return 1/8 * (
+            2**(4*k**2)+
+            2*2**(k**2)+
+            3*2**(2*k**2)+
+            2*2**(k*(2*k+1))
+        )
+
+    # 2 x 2
+    distinct_patterns(1) == 6.0
+
+    # 4 x 4
+    distinct_patterns(2) == 8548.0
+
+    # 6 x 6
+    distinct_patterns(3) == 8590557312.0
