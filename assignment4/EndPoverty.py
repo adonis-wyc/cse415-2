@@ -45,14 +45,13 @@ def can_adj_tax(s,i,delta):
     for bracket index = i
     by value = delta'''
   b_value_index = 1
-  target_b = s.b[i][b_value_index]
 
   # will the cutoff/taxrate stay above 0?
-  if target_b + delta <= 0:
+  if s.b[i][b_value_index] + delta <= 0:
     return False # tax rate cannot fall below 0
 
   # now test if shifting by delta will invalidate the order of the brackets
-  target_b = target_b + delta
+  target_b = s.b[i][b_value_index] + delta
   if i == 0:
     post_b = s.b[i+1][b_value_index]
     return target_b < post_b
@@ -70,12 +69,11 @@ def can_adj_cutoff(s,i,delta):
     for bracket index = i
     by value = delta'''
   b_value_index = 0
-  target_b = s.b[i][b_value_index]
 
-  if target_b + delta <= 0:
+  if s.b[i][b_value_index] + delta <= 0:
     return False # cutoff cannot fall below 0
 
-  target_b = target_b + delta
+  target_b = s.b[i][b_value_index] + delta
 
   if i == 0:
     post_b = s.b[i+1][b_value_index]
@@ -94,6 +92,7 @@ def adj_tax(s, i, delta):
   print(new_s.p[0])
   new_s.b[i][1] += delta
   return advance(new_s)
+
 def adj_cutoff(s, i, delta):
   new_s = s.__copy__()
   new_s.b[i][0] += delta
@@ -110,17 +109,18 @@ def advance(s):
       cut, rate = s.b[current_bracket]
       if p <= cut:
         taxes += p * rate
+        s.p[i] *= (1 + INFLATION)
         s.p[i] *= (1 -  rate)
         unfound = False
       else:
         current_bracket += 1
 
-    per_p_subsidy = taxes / len(s.p)
+  per_p_subsidy = taxes / len(s.p)
 
-    print("Taxes: %s" % taxes)
-    print("Tax Return Per P: %s" % per_p_subsidy)
-    for i, p in enumerate(s.p):
-        s.p[i] += per_p_subsidy
+  # print("Taxes: %s" % taxes)
+  # print("Tax Return Per P: %s" % per_p_subsidy)
+  for i, p in enumerate(s.p):
+      s.p[i] += per_p_subsidy
   return s
 
 
@@ -193,8 +193,8 @@ def bracket_tax_dif(s):
 #<STATE>
 class State():
   def __init__(self, p, b):
-    self.p = p
-    self.b = b
+    self.p = copy.copy(p)
+    self.b = copy.copy(b)
 
   def __str__(self):
     # Produces a brief textual description of a state.
@@ -211,7 +211,8 @@ class State():
   def __copy__(self):
     # Performs an appropriately deep copy of a state,
     # for use by operators in creating new states.
-    news = State([t for t in self.p], [copy.copy(t) for t in self.b])
+    news = State([],[])
+    news.p, news.b = [copy.deepcopy(t) for t in self.p], [copy.deepcopy(t) for t in self.b]
     return news
 #</STATE>
 
