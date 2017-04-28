@@ -92,7 +92,6 @@ def AStar(initial_state):
             new_state = op.state_transf(S)
             if not (new_state in CLOSED):
                 h = heuristics(new_state)
-
                 # h += cost
                 new_pq_item = (h, next(counter), new_state)
                 OPEN.put(new_pq_item)

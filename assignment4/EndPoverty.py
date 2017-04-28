@@ -37,11 +37,11 @@ MIN_WAGE = 27000
 INITIAL_POP_SIZE = 1000
 INFLATION = 0.018
 # MAX_TAX = .55
-MAX_TAX = .45
+MAX_TAX = .55
 MIN_TAX = .05
 TAX_RET_RATE = .25
-growth_dynamic = .10
-growth_const = 0.03
+growth_dynamic = .01
+growth_const = 0.02
 #</COMMON_DATA>
 
 #<COMMON_CODE>
