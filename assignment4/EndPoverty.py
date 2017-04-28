@@ -29,12 +29,20 @@ It is designed to work according to the QUIET tools interface, Version 1.
 import copy
 import math
 import itertools
+import statistics
+import random
 
 #<COMMON_DATA>
 POVERTY_LEVEL = 35000
-MIN_WAGE = 27000
+MIN_WAGE = 7000
+WAGE_SPREAD = 75000
 INITIAL_POP_SIZE = 1000
 INFLATION = 0.018
+MAX_TAX = .55
+MIN_TAX = .05
+TAX_RET_RATE = .25
+growth_dynamic = .01
+growth_const = 0.02
 #</COMMON_DATA>
 
 #<COMMON_CODE>
@@ -45,9 +53,9 @@ def can_adj_tax(s,i,delta):
     for bracket index = i
     by value = delta'''
   b_value_index = 1
+  proposed_tax = s.b[i][b_value_index] + delta
 
-  # will the cutoff/taxrate stay above 0?
-  if s.b[i][b_value_index] + delta <= 0:
+  if proposed_tax > MAX_TAX or proposed_tax < MIN_TAX:
     return False # tax rate cannot fall below 0
 
   # now test if shifting by delta will invalidate the order of the brackets
@@ -69,8 +77,7 @@ def can_adj_cutoff(s,i,delta):
     for bracket index = i
     by value = delta'''
   b_value_index = 0
-
-  if s.b[i][b_value_index] + delta <= 0:
+  if s.b[i][b_value_index] + delta <= 0 or i == len(s.b)-1 or i == 0:
     return False # cutoff cannot fall below 0
 
   target_b = s.b[i][b_value_index] + delta
@@ -89,7 +96,6 @@ def can_adj_cutoff(s,i,delta):
 
 def adj_tax(s, i, delta):
   new_s = s.__copy__()
-  print(new_s.p[0])
   new_s.b[i][1] += delta
   return advance(new_s)
 
@@ -100,33 +106,42 @@ def adj_cutoff(s, i, delta):
 
 # progresses a year in the state
 def advance(s):
-  s = s.__copy__()
+  s = grow_wages(s)
+  return s
+
+def grow_wages(s):
+  avg_wage = sum(s.p) / float(len(s.p))
+  std = statistics.stdev(s.p)
+  std_dist = lambda w, avg=avg_wage, std=std : abs((w - avg) / std)
+  s.p = [ w * (1 + growth_func(std_dist(w)) + INFLATION) for w in s.p]
+  return s
+
+def growth_func(x):
+
+  sigmoid_value = 1/(1+math.e**(-x/2))
+  framed = ( sigmoid_value * growth_dynamic) + growth_const
+  return framed
+
+def goal_test(s):
+  # test if everyone is above poverty level after tax and tax return
+  temp_s = s.__copy__()
   taxes = 0
-  for i, p in enumerate(s.p):
+  for i, p in enumerate(temp_s.p):
     unfound = True
     current_bracket = 0
     while unfound:
-      cut, rate = s.b[current_bracket]
+      cut, rate = temp_s.b[current_bracket]
       if p <= cut:
         taxes += p * rate
-        s.p[i] *= (1 + INFLATION)
-        s.p[i] *= (1 -  rate)
+        temp_s.p[i] *= (1 -  rate)
         unfound = False
       else:
         current_bracket += 1
-
-  per_p_subsidy = taxes / len(s.p)
-
-  # print("Taxes: %s" % taxes)
-  # print("Tax Return Per P: %s" % per_p_subsidy)
+  per_p_subsidy = taxes * TAX_RET_RATE / len(temp_s.p)
   for i, p in enumerate(s.p):
-      s.p[i] += per_p_subsidy
-  return s
-
-
-def goal_test(s):
-  '''If the state matches the sorted list it is a goal state'''
-  return all(p >= POVERTY_LEVEL for p in s.p)
+      temp_s.p[i] += per_p_subsidy
+  
+  return all(p >= POVERTY_LEVEL for p in temp_s.p)
 
 def goal_message(s):
   return "Poverty has ended!"
@@ -149,52 +164,31 @@ def h_hamming(state):
   for i,p in enumerate(state.p):
     if p < POVERTY_LEVEL: count += 1
 
-  return count + bracket_tax_dif(state)
+  return count + bracket_tax_dif(state) * 100
 
 def bracket_tax_dif(s):
   b_val_idx = 1
   difs = []
   for i in range(len(s.b)-1):
-    difs.append(s.b[i+1][b_val_idx] - s.b[i][b_val_idx])
-  return sum(difs) / float(len(difs))
+    difs.append((s.b[i+1][b_val_idx] - s.b[i][b_val_idx]))
+  avg_dif = sum(difs) / float(len(difs))
+  return avg_dif
 
-# def h_euclidean(state):
-#   import math
-#   distances = []
-#   for i,v in enumerate(state.d):
-#     g_col = v % 3
-#     g_row = v // 3 % 3
-#     c_col = i % 3
-#     c_row = i // 3 % 3
-#     dist = math.sqrt((c_col-g_col)**2 + (c_row-g_row)**2)
-#     distances.append(dist)
-#   return sum(distances)
+def h_avg(state):
+  "returns average distance below the poverty line for those below poverty line."
+  avg = 0
+  for i,p in enumerate(state.p):
+    if p < POVERTY_LEVEL: avg += POVERTY_LEVEL - p
+  avg = avg / len(state.p)
 
-# def h_manhattan(state):
-#   distances = []
-#   for i,v in enumerate(state.d):
-#     g_col = v % 3
-#     g_row = v // 3 % 3
-#     c_col = i % 3
-#     c_row = i // 3 % 3
-#     dist = abs(c_col-g_col) + abs(c_row-g_row)
-#     distances.append(dist)
-#   return sum(distances)
-
-# def h_harmonic(state):
-#   h1 = h_manhattan(state)
-#   h2 = h_euclidean(state)
-#   h3 = h_hamming(state)
-#   h = 0 if h1 == 0 or h2 == 0 or h3 == 0 else 3 / (1/h1 + 1/h2 + 1/h3)
-#   return h
-
+  return avg + bracket_tax_dif(state) * 100
 #</COMMON_CODE>
 
 #<STATE>
 class State():
   def __init__(self, p, b):
-    self.p = copy.copy(p)
-    self.b = copy.copy(b)
+    self.p = p
+    self.b = b
 
   def __str__(self):
     # Produces a brief textual description of a state.
@@ -212,14 +206,18 @@ class State():
     # Performs an appropriately deep copy of a state,
     # for use by operators in creating new states.
     news = State([],[])
-    news.p, news.b = [copy.deepcopy(t) for t in self.p], [copy.deepcopy(t) for t in self.b]
+    news.p, news.b = [t for t in self.p], [copy.copy(t) for t in self.b]
     return news
 #</STATE>
 
 #<INITIAL_STATE>
+random.seed()
+def generate_initial_state(pop_size=INITIAL_POP_SIZE):
+  pop = sorted([random.weibullvariate(0.85, 1.5) * WAGE_SPREAD + MIN_WAGE for x in range(pop_size)])
+  return pop
 
-INITAL_POPULATION = [10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 10000, 10000, 12000, 13000, 50000, 55000, 63000, 72000]
-INITAL_TAX_BRACKETS = [[11000, .0], [20000, .10], [35000, .11], [50000, .12], [75000, .15], [100000, .16], [math.inf, .17]]
+INITAL_POPULATION = generate_initial_state()
+INITAL_TAX_BRACKETS = [[11000, .0], [25000, .6], [35000, .9], [50000, .12], [75000, .15], [100000, .16], [math.inf, .17]]
 INITIAL_STATE = State(
     INITAL_POPULATION,
     INITAL_TAX_BRACKETS
@@ -228,35 +226,21 @@ CREATE_INITIAL_STATE = lambda: INITIAL_STATE
 #</INITIAL_STATE>
 
 #<OPERATORS>
+tax_deltas = [ 0.01,]
+cutoff_deltas = [1000,]
+directions = [-1, 1]
 
 OPERATORS = [
   [
-    Operator("Increase Cutoff", lambda s: can_adj_cutoff(s, i, 1000), lambda s: adj_cutoff(s,i, 1000))
-    for i in range(len(INITAL_TAX_BRACKETS))
+    Operator("Change cutoff by %.2f for bracket %s" % (delta * direction, i), lambda s, i=i, delta=delta, direction=direction: can_adj_cutoff(s, i, delta * direction), lambda s, i=i, delta=delta, direction=direction: adj_cutoff(s,i, delta * direction))
+    for delta,direction,i in itertools.product(cutoff_deltas, directions, range(len(INITAL_TAX_BRACKETS)))
   ],
   [
-    Operator("Decrease Cutoff", lambda s: can_adj_cutoff(s, i, -1000), lambda s: adj_cutoff(s,i, -1000))
-    for i in range(len(INITAL_TAX_BRACKETS))
-  ],
-  [
-    Operator("Increase Tax Rate", lambda s: can_adj_tax(s, i, 0.01), lambda s: adj_tax(s,i, 0.01))
-    for i in range(len(INITAL_TAX_BRACKETS))
-  ],
-  [
-    Operator("Decrease Tax Rate", lambda s: can_adj_tax(s, i, -0.01), lambda s: adj_tax(s,i, -0.01))
-    for i in range(len(INITAL_TAX_BRACKETS))
+    Operator("Change tax rate by %.2f for bracket %s" % (delta * direction, i), lambda s, i=i, delta=delta, direction=direction: can_adj_tax(s, i, delta * direction), lambda s, i=i, delta=delta, direction=direction: adj_tax(s,i, delta * direction))
+    for delta,direction,i in itertools.product(tax_deltas, directions, range(len(INITAL_TAX_BRACKETS)))
   ],
 ]
 OPERATORS = list(itertools.chain(*OPERATORS))
-
-# tile_combinations = itertools.product(range(9), range(9))
-# OPERATORS = [Operator("Move tile from %s to %s" % (p,q),
-#                       lambda s,p1=p,q1=q: can_move(s,p1,q1),
-#                       # The default value construct is needed
-#                       # here to capture the values of p&q separately
-#                       # in each iteration of the list comp. iteration.
-#                       lambda s,p1=p,q1=q: move(s,p1,q1) )
-#              for (p,q) in tile_combinations]
 #</OPERATORS>
 
 #<GOAL_TEST>
@@ -268,6 +252,5 @@ GOAL_MESSAGE_FUNCTION = lambda s: goal_message(s)
 #</GOAL_MESSAGE_FUNCTION>
 
 #<HEURISTICS> (optional)
-HEURISTICS = {'h_hamming': h_hamming,}
-# HEURISTICS = {'h_hamming': h_hamming,'h_manhattan': h_manhattan, 'h_euclidean': h_euclidean, 'h_custom': h_harmonic}
+HEURISTICS = {'h_hamming': h_hamming, 'h_avg': h_avg}
 #</HEURISTICS>

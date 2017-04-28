@@ -71,6 +71,10 @@ def AStar(initial_state):
         cost = S[0]
         S = S[2]
         CLOSED.append(S)
+        if COUNT % 100:
+            sys.stdout.write('.')
+            sys.stdout.flush()
+
         # DO NOT CHANGE THIS SECTION: begining
         if Problem.GOAL_TEST(S):
             print(Problem.GOAL_MESSAGE_FUNCTION(S))
@@ -80,6 +84,7 @@ def AStar(initial_state):
 
         # TODO: finish A* implementation
         for op in Problem.OPERATORS:
+
           #Optionally uncomment the following when debugging
           #a new problem formulation.
           # print("Trying operator: "+op.name)
@@ -87,7 +92,7 @@ def AStar(initial_state):
             new_state = op.state_transf(S)
             if not (new_state in CLOSED):
                 h = heuristics(new_state)
-                h += cost
+                # h += cost
                 new_pq_item = (h, next(counter), new_state)
                 OPEN.put(new_pq_item)
                 BACKLINKS[new_state] = S
