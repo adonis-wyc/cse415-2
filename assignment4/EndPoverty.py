@@ -39,7 +39,9 @@ INFLATION = 0.018
 # MAX_TAX = .55
 MAX_TAX = .45
 MIN_TAX = .05
-TAX_RET_RATE = .1
+TAX_RET_RATE = .25
+growth_dynamic = .10
+growth_const = 0.03
 #</COMMON_DATA>
 
 #<COMMON_CODE>
@@ -78,7 +80,7 @@ def can_adj_cutoff(s,i,delta):
     for bracket index = i
     by value = delta'''
   b_value_index = 0
-  if s.b[i][b_value_index] + delta <= 0 or i == len(s.b)-1:
+  if s.b[i][b_value_index] + delta <= 0 or i == len(s.b)-1 or i == 0:
     return False # cutoff cannot fall below 0
 
   target_b = s.b[i][b_value_index] + delta
@@ -107,28 +109,7 @@ def adj_cutoff(s, i, delta):
 
 # progresses a year in the state
 def advance(s):
-  taxes = 0
-  for i, p in enumerate(s.p):
-    unfound = True
-    current_bracket = 0
-    while unfound:
-      cut, rate = s.b[current_bracket]
-      if p <= cut:
-        taxes += p * rate
-        s.p[i] *= (1 + INFLATION)
-        # s.p[i] *= (1 -  rate)
-        unfound = False
-      else:
-        current_bracket += 1
-
   s = grow_wages(s)
-
-  per_p_subsidy = taxes * TAX_RET_RATE / len(s.p)
-
-  # print("Taxes: %s" % taxes)
-  # print("Tax Return Per P: %s" % per_p_subsidy)
-  for i, p in enumerate(s.p):
-      s.p[i] += per_p_subsidy
   return s
 
 def grow_wages(s):
@@ -139,15 +120,34 @@ def grow_wages(s):
   return s
 
 def growth_func(x):
-  growth_dynamic = .10
-  growth_const = 0.03
+
   sigmoid_value = 1/(1+math.e**(-x/2))
   framed = ( sigmoid_value * growth_dynamic) + growth_const
   return framed
 
 def goal_test(s):
-  '''If the state matches the sorted list it is a goal state'''
-  return all(p >= POVERTY_LEVEL for p in s.p)
+  # test if everyone is above poverty level after tax and tax return
+  temp_s = s.__copy__()
+  taxes = 0
+  for i, p in enumerate(temp_s.p):
+    unfound = True
+    current_bracket = 0
+    while unfound:
+      cut, rate = temp_s.b[current_bracket]
+      if p <= cut:
+        taxes += p * rate
+        temp_s.p[i] *= (1 + INFLATION)
+        temp_s.p[i] *= (1 -  rate)
+        unfound = False
+      else:
+        current_bracket += 1
+  per_p_subsidy = taxes * TAX_RET_RATE / len(temp_s.p)
+  # print("Per Person Sub: %s" % per_p_subsidy)
+  for i, p in enumerate(s.p):
+      temp_s.p[i] += per_p_subsidy
+  # print(temp_s.p[0])
+  # print([p >= POVERTY_LEVEL for p in temp_s.p])
+  return all(p >= POVERTY_LEVEL for p in temp_s.p)
 
 def goal_message(s):
   return "Poverty has ended!"
@@ -165,13 +165,16 @@ class Operator:
     return self.state_transf(s)
 
 def h_hamming(state):
+  # print(state)
   "Counts the number of people below the poverty line."
   count = 0
+  avg = 0
   for i,p in enumerate(state.p):
-    # if p < POVERTY_LEVEL: count += 1
+    if p < POVERTY_LEVEL: avg += POVERTY_LEVEL - p
     if p < POVERTY_LEVEL: count += 1
+  avg = avg / len(state.p)
 
-  return count + bracket_tax_dif(state) * 100
+  return avg + bracket_tax_dif(state) * 100
 
 def bracket_tax_dif(s):
   b_val_idx = 1
