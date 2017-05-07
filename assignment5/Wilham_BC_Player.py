@@ -2,7 +2,6 @@
 Wil-ham, implementation of an agent to play Baroque Chess by William Menten-Weil and Graham Kelly.
 
 '''
-# import defaultdict
 import math
 import time
 MoveTree = defaultdict(list)
@@ -13,13 +12,13 @@ def makeMove(currentState, currentRemark, timelimit):
     # return [[newMoveDesc, currentState], newRemark]
     root = currentState
 
-    inital_cut = 3
-    max_ply = 8
+    inital_depth = 1
+    max_depth = 10
     remaining = timelimit
     last_iter_time = time.time()
-    for cut in range(inital_cut, max_ply)
-        idfs(root, cut)
-        minimax(root)
+    for depth in range(inital_depth, max_depth)
+        # idfs(root, depth)
+        minimax(root, depth)
         cur_time = time.time()
         elapsed = cur_time - last_iter_time
         last_iter_time = cur_time
@@ -42,12 +41,11 @@ def introduce():
 def prepare(player2Nickname):
     pass
 
+# depreciated in favor of minimax with alpha beta
 def idfs(state, cut):
     if cut == 0: return
-
-    if state in MoveTree:
+    if zhash(state.board) in MoveTree:
         for new in MoveTree[State]:
-            # TODO add terminator for if a b pruning test is failed
             idfs(new, cut-1)
     else:
         for x, row in enumerate(state):
@@ -61,28 +59,30 @@ def idfs(state, cut):
                         MoveTree[zhash(state.board)].append(new)
                         idfs(new, cut-1)
 
-def minimax(state, alphabeta=[-math.inf, math.inf]):
+def minimax(state,depth, alphabeta=[-math.inf, math.inf]):
     if zhash(state.board) not in MoveTree: # this is a leaf node
         cost = staticEval(state)
         state.heur_val = cost
         return cost
     else: # this is not a leaf node
         if state.whose_move == WHITE: # Max move
-            canidate = -math.inf
+            v = -math.inf
             for child in MoveTree[zhash(state.board)]:
-                sub_cost = minimax(child, alphabeta)
-                canidate = max(canidate, minimax(child, alphabeta))
-                alpha = max(alphabeta[0], canidate)
+                sub_cost = minimax(child, depth, alphabeta)
+                v = max(v, minimax(child, alphabeta))
+                alpha = max(alphabeta[0], v)
+                alphabeta[0] = alpha
                 if alphabeta[1] <= alphabeta[0]:
                     break
             state.heur_val = v
             return v
         else: # Min move
-            canidate = math.inf
+            v = math.inf
             for child in MoveTree[zhash(state.board)]:
-                sub_cost = minimax(child, alphabeta)
-                canidate = min(canidate, minimax(child, alphabeta))
-                beta = min(alphabeta[1], canidate)
+                sub_cost = minimax(child, depth, alphabeta)
+                v = min(v, minimax(child, alphabeta))
+                beta = min(alphabeta[1], v)
+                alphabeta[1] = beta
                 if alphabeta[1] <= alphabeta[0]:
                     break
             state.heur_val = v
@@ -187,8 +187,25 @@ def can_move(state, start, end):
     piece = to_piece(state, start)
     if state.whose_move != who(piece) :
         return False
+    if is_frozen(state, start):
+        return False
     piece = piece.lower()
     return can_move_piece(state, start, end, piece=piece)
+
+def is_frozen(state, start):
+
+    surrounding_space_deltas = itertools.product([-1,0,1],[-1,0,1])
+    for dr, dc in surrounding_space_deltas:
+        try:
+            adj_code = state.board[start[0] + dx][start[1] + dy]
+            if INIT_TO_CODE[adj_code].lower() == 'f' and who(adj_code) != state.whose_move:
+                return True
+            elif INIT_TO_CODE[adj_code].lower() == 'i' and who(adj_code) != state.whose_move:
+                adj_loc = [start[0] + dx,start[1] + dy]
+                return is_frozen(state,adj_loc)
+        except KeyError:
+            pass
+    return False
 
 
 def can_move_piece(state, start, end, piece='-'):
@@ -234,7 +251,7 @@ def can_move_linear(state, start, end, jumps=0):
             row = state.board[row_index]
             col = row[start[1]]
             if CODE_TO_INIT[col] != '-':
-                if jumps > 0:
+                if jumps > 0 and state.whose_move != who(col):
                     jumps -= 1
                 else:
                     return False
@@ -257,10 +274,10 @@ def can_move_king(state, start, end):
     if x_dif > 1 or y_dif > 1:
         return False
 
-    if CODE_TO_INIT[state.board[end[0]][end[1]]] != '-':
-        return False
-    else:
-        return True
+    # if CODE_TO_INIT[state.board[end[0]][end[1]]] != '-':
+    #     return False
+    # else:
+    return True
 
 def can_move_diag(state, start, end, jumps=0):
     x_dif = start[0] - end[0]
@@ -283,7 +300,7 @@ def can_move_diag(state, start, end, jumps=0):
         col_index = start[1] + row_dist*y_dif
         cell = state.board[row_index][col_index]
         if CODE_TO_INIT[cell] != '-':
-            if jumps > 0:
+            if jumps > 0 and state.whose_move != who(cell):
                 jumps -= 1
             else:
                 return False
@@ -295,7 +312,7 @@ def can_move_leaper(state,start,end):
     x_dif = abs(start[0] - end[0])
     y_dif = abs(start[1] - end[1])
 
-    if can_move_linear(state, start, end, jumps=1) or can_move_diag(state, start, end, jumps=1):
+    if can_move_linear(state, start, end, jumps=1) or can_move_diag(state, start, end, jumps=0):
         return True
     else
         return False
@@ -307,8 +324,11 @@ def can_move_imitator(state,start,end):
         if x_delt == y_delt and x_delt == 0: # to prevent infinite loop in check imitators own space (no imitation) as a noble
             can_moves.append(can_move_noble(state,start,end))
         adj_x, adj_y = start[0] +x_delt, start[1]+y_delt
-        adj_p = CODE_TO_INIT[state.board[adj_x][adj_y]]
-        can_moves.append(can_move_piece(state,start,end,piece=adj_p))
+        try:
+            adj_p = CODE_TO_INIT[state.board[adj_x][adj_y]]
+            can_moves.append(can_move_piece(state,start,end,piece=adj_p))
+        except KeyError:
+            pass
     return any(can_moves)
 
 def can_move_noble(state, start, end):
@@ -321,19 +341,95 @@ def can_move_noble(state, start, end):
         return False
 
 # TODO for imitator Move pick move which removes the best pieces
+# TODO check for frozen pieces in can_move
 
-def move(state, start, end):
+def move(state, start, end)
     new_state = state.__copy__()
-    new_state.whose_move = (new_state.whose_move + 1) % 2
-    piece = CODE_TO_INIT[new_state.board[start[0]][start[1]]]
-    piece = INIT_TO_TEXT[piece]
+    piece_code = new_state.board[start[0]][start[1]]
+    piece = CODE_TO_INIT[piece_code]
+    piece_text = INIT_TO_TEXT[piece]
     s_col = COL_TO_LETTER[start[1]]
     s_row = start[0]+1
     e_col = COL_TO_LETTER[end[1]]
     e_row = end[0]+1
-    new_state.move_description = '%s from %s%s to %s%s' % (piece, s_col, s_row, e_col, e_row)
+    new_state.move_description = '%s from %s%s to %s%s' % (piece_text, s_col, s_row, e_col, e_row)
 
-    # TODO build the move router here
+    if piece == 'p'
+        new_state = move_pawn(new_state, start, end)
+    elif piece == 'k':
+        # new_state = move_king(new_state, start, end)
+        pass
+    elif piece in ['w', 'c', 'f']: # TODO break these apart
+        new_state = move_noble(new_state, start, end)
+    elif piece == 'l':
+        new_state = move_leaper(new_state, start, end)
+    elif piece == 'i':
+        new_state = move_imitator(new_state, start, end)
+    else:
+        raise ValueError("Unkown Piece %s" % piece)
+
+     new_state.board[start[0]][start[1]] = 0
+     new_state.board[end[0]][end[1]] = piece_code
+     new_state.whose_move = (new_state.whose_move + 1) % 2
+
+
+    #TODO fix for imitator. DONE
+def move_pawn(state, start, end):
+    whos_piece = whos(state.board[start[0]][start[1]])
+    piece_code = 3 if whos_piece == 1 else piece_code = 2
+    # piece_code = state.board[end[0]][end[1]]
+    pos_deltas = [-2,2]
+    for index in range(2):
+        for delt in pos_deltas:
+            init_delta = [0,0]
+            init_delta[index] = pos_deltas
+            try:
+                if state.board[end[0] + init_delta[0]][end[1] + init_delta[1]] == piece_code:
+                    state.board[end[0] + (init_delta[0]/2)][end[1] + (init_delta[1]/2)] = 0
+            except KeyError:
+                pass
+    return state
+
+def move_king(state, start, end):
+    pass
+
+def move_leaper(state, start, end):
+    if start[0] == end[0]:
+        for i in range(start[1], end[1], 1 if end[1] > start[1] else -1):
+            state.board[start[0]][i] = 0
+    elif start[1] == end[1]:
+        for i in range(start[0], end[0], 1 if end[0] > start[0] else -1):
+            state.board[i][start[1]] = 0
+    else:
+        for x, y in zip(start[0], end[0], 1 if end[0] > start[0] else -1, range(start[1], end[1], 1 if end[1] > start[1] else -1)):
+            state.board[x][y] = 0
+
+def move_withdrawer(state, start, end):
+    surrounding_space_deltas = itertools.product([-1,0,1],[-1,0,1])
+    for dr, dc in surrounding_space_deltas:
+        try:
+            state.board[start[0] + dx][start[1] + dy] = 0
+        except KeyError:
+            pass
+
+def move_coordinator(state, start, end):
+    me = state.whose_move
+    for i,vi in enumerate(state.board):
+        for j, vj in enumerate(vi):
+            if who(vj) == me and vj in [13,14]: k_idx = [i, j]
+    dr = k_idx[0] - end[0]
+    dc = k_idx[1] - end[1]
+
+    if who(state.board[k_idx[0] - dr][k_idx[1] ]) != me:
+        state.board[k_idx[0] - dr][k_idx[1] ] = 0
+    if who(state.board[k_idx[0]][k_idx[1] - dc]) != me:
+        state.board[k_idx[0]][k_idx[1] - dc]
+
+def move_freezer(state, start, end):
+    pass
+
+def move_imitator(state, start, end):
+
 
 def who(piece): return piece % 2
 
