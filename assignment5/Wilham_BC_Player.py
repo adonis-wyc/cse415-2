@@ -33,13 +33,14 @@ def makeMove(currentState, currentRemark, timelimit):
             return  [[canidate_state.move_description, canidate_state], newRemark]
 
 def nickname():
-    return "Wil-ham"
+    return "Wilham"
 
 def introduce():
-    return "I'm Wil-ham, I was created by William Menten-Weil (wtmenten) and Graham Kelly (grahamtk) to play in a Baroque Chess tournament."
+    return "I'm Wilham, I was created by William Menten-Weil (wtmenten) and Graham Kelly (grahamtk) to play in a Baroque Chess tournament."
 
 def prepare(player2Nickname):
-    pass
+    return "Hello %s. Let's begin." % player2Nickname
+    # pass
 
 # depreciated in favor of minimax with alpha beta
 def idfs(state, cut):
