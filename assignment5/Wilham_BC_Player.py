@@ -1,4 +1,4 @@
-'''BaroqueAgent.py
+'''Wilham_BC_Player.py
 Wil-ham, implementation of an agent to play Baroque Chess by William Menten-Weil and Graham Kelly.
 
 '''
