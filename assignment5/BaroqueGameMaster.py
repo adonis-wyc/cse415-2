@@ -1,4 +1,4 @@
-'''TimedGameMaster.py based on GameMaster.py which in turn is 
+'''TimedGameMaster.py based on GameMaster.py which in turn is
  based on code from RunKInARow.py
 
 S. Tanimoto, May 3
@@ -13,17 +13,17 @@ VERSION = '1.0-BETA'
 import sys
 TIME_PER_MOVE = 10 # default time limit is ten seconds.
 if len(sys.argv) > 1:
-    import importlib    
+    import importlib
     player1 = importlib.import_module(sys.argv[1])
     player2 = importlib.import_module(sys.argv[2])
     if len(sys.argv) > 3:
         TIME_PER_MOVE = float(sys.argv[3])
 else:
-    import TestAgent1 as player1
-    import TestAgent1 as player2
+    import Wilham_BC_Player as player1
+    import Wilham_BC_Player as player2
 
 
-# Specify details of a match here: 
+# Specify details of a match here:
 
 #import baroque_succ as bcs
 import new_succ as bcs
@@ -61,7 +61,7 @@ def runGame():
         report = 'Congratulations to Player 1 ('+player1.nickname()+')!'
         print(report)
         return
-    
+
     print('The Gamemaster says, "Let\'s Play!"')
     print('The initial state is...')
 
@@ -124,9 +124,9 @@ import sys
 import time
 from traceback import print_exc
 def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
-    '''This function will spawn a thread and run the given function using the args, kwargs and 
-    return the given default value if the timeout_duration is exceeded 
-    ''' 
+    '''This function will spawn a thread and run the given function using the args, kwargs and
+    return the given default value if the timeout_duration is exceeded
+    '''
     import threading
     class PlayerThread(threading.Thread):
         def __init__(self):
@@ -173,9 +173,9 @@ def DEEP_EQUALS(s1, s2):
     return False
   b1 = s1.board
   b2 = s2.board
-  for i in range(8):                  
-    for j in range(8):                  
+  for i in range(8):
+    for j in range(8):
       if b1[i][j] != b2[i][j]: return False
   return True
-                      
+
 runGame()
