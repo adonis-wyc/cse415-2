@@ -33,8 +33,6 @@ def makeMove(currentState, currentRemark, timelimit):
             newRemark = "Your Move!"
             return  [[canidate_state.move_description, canidate_state], newRemark]
 
-        # TODO add logic to see if we have enough time for another iteration
-
 def nickname():
     return "Wil-ham"
 
@@ -60,18 +58,18 @@ def idfs(state, cut):
                 for op in ops:
                     if op.precond(state, ):
                         new = op.state_trans(state)
-                        MoveTree[state].append(new)
+                        MoveTree[zhash(state.board)].append(new)
                         idfs(new, cut-1)
 
 def minimax(state, alphabeta=[-math.inf, math.inf]):
-    if state not in MoveTree: # this is a leaf node
+    if zhash(state.board) not in MoveTree: # this is a leaf node
         cost = staticEval(state)
         state.heur_val = cost
         return cost
     else: # this is not a leaf node
         if state.whose_move == WHITE: # Max move
             canidate = -math.inf
-            for child in MoveTree[state]:
+            for child in MoveTree[zhash(state.board)]:
                 sub_cost = minimax(child, alphabeta)
                 canidate = max(canidate, minimax(child, alphabeta))
                 alpha = max(alphabeta[0], canidate)
@@ -81,7 +79,7 @@ def minimax(state, alphabeta=[-math.inf, math.inf]):
             return v
         else: # Min move
             canidate = math.inf
-            for child in MoveTree[state]:
+            for child in MoveTree[zhash(state.board)]:
                 sub_cost = minimax(child, alphabeta)
                 canidate = min(canidate, minimax(child, alphabeta))
                 beta = min(alphabeta[1], canidate)
@@ -114,6 +112,30 @@ class Operator:
   def apply(self, s):
     return self.state_transf(s)
 
+board_postions = 8**2
+max_piece_code = max(INIT_TO_CODE.values())
+zobristnum = [[0]*board_postions]*max_piece_code
+from random import randint
+
+def myinit():
+    global zobristnum
+    for i in range(board_postions):
+        for j in range(max_piece_code):
+            zobristnum[i][j]=\
+            randint(0, \
+            4294967296)
+
+def zhash(board):
+    global zobristnum
+    val = 0;
+    for row_index in range(board):
+        row = board[row_index]
+        for col_index in range(row):
+            piece_code = row[col_index]
+            board_pos = row_index*col_index
+            val ^= zobristnum[board_pos][piece_code]
+    return val
+
 BLACK = 0
 WHITE = 1
 
@@ -124,13 +146,13 @@ CODE_TO_INIT = {0:'-',2:'p',3:'P',4:'c',5:'C',6:'l',7:'L',8:'i',9:'I',
   10:'w',11:'W',12:'k',13:'K',14:'f',15:'F'}
 
 INIT_TO_TEXT = {
-    'p': 'pincer'
-    'l': 'leaper'
-    'i': 'imitator'
-    'w': 'withdrawer'
-    'k': 'king'
-    'c': 'coordinator'
-    'f': 'freezer'
+    'p': 'Pincer'
+    'l': 'Leaper'
+    'i': 'Imitator'
+    'w': 'Withdrawer'
+    'k': 'King'
+    'c': 'Coordinator'
+    'f': 'Freezer'
     '-': 'empty square on the board'
 }
 
@@ -303,12 +325,13 @@ def can_move_noble(state, start, end):
 def move(state, start, end):
     new_state = state.__copy__()
     new_state.whose_move = (new_state.whose_move + 1) % 2
-    peice = CODE_TO_INIT[new_state.board[start[0]][start[1]]]
+    piece = CODE_TO_INIT[new_state.board[start[0]][start[1]]]
+    piece = INIT_TO_TEXT[piece]
     s_col = COL_TO_LETTER[start[1]]
     s_row = start[0]+1
     e_col = COL_TO_LETTER[end[1]]
     e_row = end[0]+1
-    new_state.move_description = '%s from %s%s to %s%s' % (peice, s_col, s_row, e_col, e_row)
+    new_state.move_description = '%s from %s%s to %s%s' % (piece, s_col, s_row, e_col, e_row)
 
     # TODO build the move router here
 
@@ -342,7 +365,6 @@ class BC_state:
     new_board = [r[:] for r in old_board]
     self.board = new_board
     self.whose_move = whose_move
-    self.move_description = ''
 
   def __repr__(self):
     s = ''
