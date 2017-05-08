@@ -56,7 +56,7 @@ INIT_TO_PIECE_VALUES = {
 board_postions = 8**2
 max_piece_code = max(INIT_TO_CODE.values()) + 1
 # zobristnum = [[0]*max_piece_code]*board_postions
-zobristnum= [[0 for x in range(max_piece_code)] for y in range(board_postions)]
+zobristnum= [[[0 for x in range(max_piece_code)] for y in range(board_postions)] for z in range(board_postions)]
     # for j range(max_piece_code):
 
 
@@ -68,8 +68,9 @@ from random import randint
 def zobinit():
     global zobristnum
     for i in range(board_postions):
-        for j in range(max_piece_code):
-            zobristnum[i][j] = randint(0,  4294967296)
+        for j in range(board_postions):
+            for k in range(max_piece_code):
+                zobristnum[i][j][k] = randint(0,  4294967296)
 zobinit()
 
 def zhash(state):
@@ -81,10 +82,10 @@ def zhash(state):
         row = board[row_index]
         for col_index in range(len(row)):
             piece_code = row[col_index]
-            board_pos = row_index*col_index
+            # board_pos = row_index*col_index
             # print("Row: %s Col: %s" % (row_index, col_index))
             # print("Board Pos: ", board_pos)
-            zob_bp = zobristnum[board_pos]
+            zob_bp = zobristnum[row_index][col_index]
             zob_num = zob_bp[piece_code]
             val ^= zob_num
     # val ^= whose
@@ -112,32 +113,34 @@ def makeMove(currentState, currentRemark, timelimit):
     # newMoveDesc = 'No move'
     # return [[newMoveDesc, currentState], newRemark]
     print('Turn at start of makemove %s' % currentState.whose_move)
-    print(currentState)
+    # print(currentState)
     root = currentState
 
     roothash = zhash(root)
-    print(roothash)
+    print('Hash of received state %d' % roothash)
     inital_depth = 1
-    max_depth = 15
+    max_depth = 10
+    timelimit = timelimit - 2
     remaining = timelimit
     last_iter_time = time.time()
     for depth in range(inital_depth, max_depth):
         # idfs(root, depth)
-        minimax([None,root], depth, whose=root.whose_move)
         cur_time = time.time()
         elapsed = cur_time - last_iter_time
         last_iter_time = cur_time
         remaining -= elapsed
-        if float(remaining) / elapsed < 1.5:
+        minimax([None,root], depth, whose=root.whose_move, times=(cur_time, remaining))
+        # if float(remaining) / elapsed < 1.7:
+        if remaining < 2:
             canidate_state = None
             if root.whose_move == WHITE:
                 canidate_state = max(MoveTree[roothash], key=lambda s: s[0])[1]
             else:
                 canidate_state = min(MoveTree[roothash], key=lambda s: s[0])[1]
             newRemark = "Your Move!"
-            print(canidate_state)
+            # print(canidate_state)
             # print([s[0] for s in MoveTree[roothash]])
-            print(zhash(canidate_state))
+            # print(zhash(canidate_state))
 
             return  [[canidate_state.move_description, canidate_state], newRemark]
     # print([s[0] for s in MoveTree[roothash]])
@@ -149,8 +152,8 @@ def makeMove(currentState, currentRemark, timelimit):
     newRemark = "Your Move!"
     print('Turn at end of makemove %s' % currentState.whose_move)
     print('Turn at end of makemove for new state %s' % canidate_state.whose_move)
-    print(canidate_state)
-    print(zhash(canidate_state))
+    # print(canidate_state)
+    print('Hash of new state %d' % zhash(canidate_state))
     return  [[canidate_state.move_description, canidate_state], newRemark]
 
 def nickname():
@@ -181,10 +184,10 @@ def prepare(player2Nickname):
 #                         MoveTree[zhash(state.board)].append(new)
 #                         idfs(new, cut-1)
 
-def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
+def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')], times=(0, 0)):
     # print(depth)
-
-    if depth < 1: # this is a leaf node
+    # print('time 0 %d time 1 %d curtime %d' % (times[0], times[1], time.time()))
+    if depth < 1 or times[0] + times[1] <= time.time(): # this is a leaf node
         cost = staticEval(state[1])
         state[0] = cost
         return cost
@@ -203,7 +206,7 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
         if whose == WHITE: # Max move
             v = -1*float('inf')
             for ci,child in enumerate(MoveTree[zhash(state[1])]):
-                sub_cost = minimax(child, depth-1, whose=BLACK, alphabeta=alphabeta)
+                sub_cost = minimax(child, depth-1, whose=BLACK, alphabeta=alphabeta, times=times)
                 v = max(v, sub_cost)
                 alpha = max(alphabeta[0], v)
                 alphabeta[0] = alpha
@@ -215,7 +218,7 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
         else: # Min move
             v = float('inf')
             for ci,child in enumerate(MoveTree[zhash(state[1])]):
-                sub_cost = minimax(child, depth-1, whose=WHITE, alphabeta=alphabeta)
+                sub_cost = minimax(child, depth-1, whose=WHITE, alphabeta=alphabeta, times=times)
                 v = min(v, sub_cost)
                 beta = min(alphabeta[1], v)
                 alphabeta[1] = beta
@@ -229,11 +232,46 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
 
 def staticEval(state):
     value = 0
-    for row in state.board:
-        for col in row:
-            modifer = (who(col) * 2) - 1
-            value += modifer * INIT_TO_PIECE_VALUES[CODE_TO_INIT[col].lower()](state)
+    me = state.whose_move
+    for r, row in enumerate(state.board):
+        for c, col in enumerate(row):
+            modifier = (who(col) * 2) - 1
+            for p in get_adj_pieces(state, r, c):
+                if CODE_TO_INIT[p].lower() == 'f':
+                    if who(p) != me:
+                        modifier *= .75
+                    else:
+                        modifier *= 1.1
+                elif CODE_TO_INIT[p].lower() == 'w':
+                    if who(p) != me:
+                        modifier *= .2
+                elif CODE_TO_INIT[p].lower() == 'k':
+                    if who(p) != me:
+                        modifier *= .2
+                elif CODE_TO_INIT[p].lower() == 'i':
+                    if who(p) != me:
+                        modifier *= .5
+                elif CODE_TO_INIT[p].lower() == 'l':
+                    if who(p) != me:
+                        modifier *= .6
+                elif CODE_TO_INIT[p].lower() == 'p':
+                    if who(p) != me:
+                        modifier *= .85
+            value += modifier * INIT_TO_PIECE_VALUES[CODE_TO_INIT[col].lower()](state)
     return value
+
+def get_adj_pieces(state, r, c):
+    adj = []
+    pos_deltas = [-1,0,1]
+    deltas = itertools.product(pos_deltas, pos_deltas)
+    for delta in deltas:
+        if delta != [0,0]:
+            try:
+                piece = state.board[r + delta[0]][c + delta[1]]
+                adj.append(piece)
+            except IndexError:
+                pass
+    return adj
 
 def to_piece(state,start):
     code = state.board[start[0]][start[1]]
@@ -449,6 +487,7 @@ def move_piece(new_state, start, end, piece='-'):
 def move_pawn(state, start, end):
     whos_piece = who(state.board[start[0]][start[1]])
     piece_code = 3 if whos_piece == 1 else 2
+    me = state.whose_move
     # piece_code = state.board[end[0]][end[1]]
     pos_deltas = [-2,2]
     for index in range(2):
@@ -456,7 +495,8 @@ def move_pawn(state, start, end):
             init_delta = [0,0]
             init_delta[index] = delt
             try:
-                if state.board[end[0] + init_delta[0]][end[1] + init_delta[1]] == piece_code:
+                if state.board[end[0] + init_delta[0]][end[1] + init_delta[1]] == piece_code and\
+                who(state.board[end[0] + (init_delta[0]//2)][end[1] + (init_delta[1]//2)]) != me:
                     state.board[end[0] + (init_delta[0]//2)][end[1] + (init_delta[1]//2)] = 0
             except IndexError:
                 pass
@@ -478,12 +518,22 @@ def move_leaper(state, start, end):
     return state
 
 def move_withdrawer(state, start, end):
-    surrounding_space_deltas = itertools.product([-1,0,1],[-1,0,1])
-    for dr, dc in surrounding_space_deltas:
-        try:
-            state.board[start[0] + dr][start[1] + dc] = 0
-        except IndexError:
-            pass
+    r_dif = end[0] - start[0]
+    c_dif = end[1] - start[1]
+    r_dir = int((r_dif * -1) / r_dif) if r_dif != 0 else 0
+    c_dir = int((c_dif * -1) / c_dif) if c_dif != 0 else 0
+    try:
+        piece = state.board[start[0] + r_dir][start[1] + c_dir]
+        if who(piece) != state.whose_move:
+            state.board[start[0] + r_dir][start[1] + c_dir] = 0
+    except IndexError:
+        pass
+    # surrounding_space_deltas = itertools.product([-1,0,1],[-1,0,1])
+    # for dr, dc in surrounding_space_deltas:
+    #     try:
+    #         state.board[start[0] + dr][start[1] + dc] = 0
+    #     except IndexError:
+    #         pass
     return state
 
 def move_coordinator(state, start, end):
