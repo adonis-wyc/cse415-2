@@ -55,23 +55,28 @@ INIT_TO_PIECE_VALUES = {
 
 board_postions = 8**2
 max_piece_code = max(INIT_TO_CODE.values()) + 1
-zobristnum = [[0]*max_piece_code]*board_postions
+# zobristnum = [[0]*max_piece_code]*board_postions
+zobristnum= [[0 for x in range(max_piece_code)] for y in range(board_postions)]
+    # for j range(max_piece_code):
+
+
 from random import randint
 # import numpy as np
 # print(np.array(zobristnum).shape)
 # import sys
 # sys.exit(0)
-def myinit():
+def zobinit():
     global zobristnum
     for i in range(board_postions):
         for j in range(max_piece_code):
-            zobristnum[i][j]=\
-            randint(0, \
-            4294967296)
+            zobristnum[i][j] = randint(0,  4294967296)
+zobinit()
 
-def zhash(board):
+def zhash(state):
+    whose = state.whose_move
+    board = state.board
     global zobristnum
-    val = 0;
+    val = 0
     for row_index in range(len(board)):
         row = board[row_index]
         for col_index in range(len(row)):
@@ -80,7 +85,9 @@ def zhash(board):
             # print("Row: %s Col: %s" % (row_index, col_index))
             # print("Board Pos: ", board_pos)
             zob_bp = zobristnum[board_pos]
-            val ^= zob_bp[piece_code]
+            zob_num = zob_bp[piece_code]
+            val ^= zob_num
+    # val ^= whose
     return val
 
 
@@ -105,38 +112,45 @@ def makeMove(currentState, currentRemark, timelimit):
     # newMoveDesc = 'No move'
     # return [[newMoveDesc, currentState], newRemark]
     print('Turn at start of makemove %s' % currentState.whose_move)
+    print(currentState)
     root = currentState
-    roothash = zhash(root.board)
+
+    roothash = zhash(root)
+    print(roothash)
     inital_depth = 1
-    max_depth = 10
+    max_depth = 15
     remaining = timelimit
     last_iter_time = time.time()
     for depth in range(inital_depth, max_depth):
         # idfs(root, depth)
-        minimax(root, depth, whose=root.whose_move)
+        minimax([None,root], depth, whose=root.whose_move)
         cur_time = time.time()
         elapsed = cur_time - last_iter_time
         last_iter_time = cur_time
         remaining -= elapsed
-        if float(remaining) / elapsed < 1:
+        if float(remaining) / elapsed < 1.5:
             canidate_state = None
             if root.whose_move == WHITE:
-                canidate_state = max(MoveTree[roothash], key=lambda s: s.heur_val)
+                canidate_state = max(MoveTree[roothash], key=lambda s: s[0])[1]
             else:
-                canidate_state = min(MoveTree[roothash], key=lambda s: s.heur_val)
+                canidate_state = min(MoveTree[roothash], key=lambda s: s[0])[1]
             newRemark = "Your Move!"
-            # print(canidate_state)
+            print(canidate_state)
+            # print([s[0] for s in MoveTree[roothash]])
+            print(zhash(canidate_state))
+
             return  [[canidate_state.move_description, canidate_state], newRemark]
-    # print(MoveTree[roothash])
+    # print([s[0] for s in MoveTree[roothash]])
     canidate_state = None
     if root.whose_move == WHITE:
-        canidate_state = max(MoveTree[roothash], key=lambda s: s.heur_val)
+        canidate_state = max(MoveTree[roothash], key=lambda s: s[0])[1]
     else:
-        canidate_state = min(MoveTree[roothash], key=lambda s: s.heur_val)
+        canidate_state = min(MoveTree[roothash], key=lambda s: s[0])[1]
     newRemark = "Your Move!"
     print('Turn at end of makemove %s' % currentState.whose_move)
     print('Turn at end of makemove for new state %s' % canidate_state.whose_move)
-    # print(canidate_state)
+    print(canidate_state)
+    print(zhash(canidate_state))
     return  [[canidate_state.move_description, canidate_state], newRemark]
 
 def nickname():
@@ -169,44 +183,48 @@ def prepare(player2Nickname):
 
 def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
     # print(depth)
+
     if depth < 1: # this is a leaf node
-        cost = staticEval(state)
-        state.heur_val = cost
+        cost = staticEval(state[1])
+        state[0] = cost
         return cost
     else: # this is not a leaf node
-        # children = []
-        if zhash(state.board) not in MoveTree:
-            for x, row in enumerate(state.board):
+        # print(zhash(state[1]))
+        if zhash(state[1]) not in MoveTree:
+            for x, row in enumerate(state[1].board):
                 for y, col in enumerate(row):
                     piece = CODE_TO_INIT[col]
                     ops = OPERATORS
                     for op in ops:
-                        if op.precond(state):
-                            new = op.state_transf(state)
-                            MoveTree[zhash(state.board)].append(new)
-        # children = MoveTree[zhash(state.board)]
+                        if op.precond(state[1]):
+                            new = op.state_transf(state[1])
+                            MoveTree[zhash(state[1])].append([staticEval(new),new])
 
         if whose == WHITE: # Max move
             v = -1*float('inf')
-            for child in MoveTree[zhash(state.board)]:
+            for ci,child in enumerate(MoveTree[zhash(state[1])]):
                 sub_cost = minimax(child, depth-1, whose=BLACK, alphabeta=alphabeta)
                 v = max(v, sub_cost)
                 alpha = max(alphabeta[0], v)
                 alphabeta[0] = alpha
                 if alphabeta[1] <= alphabeta[0]:
                     break
-            state.heur_val = v
+            # print(v)
+            MoveTree[zhash(state[1])][ci][0] = v
             return v
         else: # Min move
             v = float('inf')
-            for child in MoveTree[zhash(state.board)]:
+            for ci,child in enumerate(MoveTree[zhash(state[1])]):
                 sub_cost = minimax(child, depth-1, whose=WHITE, alphabeta=alphabeta)
                 v = min(v, sub_cost)
                 beta = min(alphabeta[1], v)
                 alphabeta[1] = beta
                 if alphabeta[1] <= alphabeta[0]:
                     break
-            state.heur_val = v
+            # print(v)
+            MoveTree[zhash(state[1])][ci][0] = v
+
+            # state[0] = v
             return v
 
 def staticEval(state):
@@ -455,7 +473,7 @@ def move_leaper(state, start, end):
         for i in range(start[0], end[0], 1 if end[0] > start[0] else -1):
             state.board[i][start[1]] = 0
     else:
-        for x, y in zip(start[0], end[0], 1 if end[0] > start[0] else -1, range(start[1], end[1], 1 if end[1] > start[1] else -1)):
+        for x, y in zip(range(start[0], end[0], 1 if end[0] > start[0] else -1), range(start[1], end[1], 1 if end[1] > start[1] else -1)):
             state.board[x][y] = 0
     return state
 
