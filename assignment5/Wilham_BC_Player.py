@@ -123,28 +123,26 @@ def makeMove(currentState, currentRemark, timelimit):
     timelimit = timelimit - 2
     remaining = timelimit
     last_iter_time = time.time()
+    max_ply_reached = inital_depth
     for depth in range(inital_depth, max_depth):
         # idfs(root, depth)
+        max_ply_reached = depth
         cur_time = time.time()
         elapsed = cur_time - last_iter_time
         last_iter_time = cur_time
         remaining -= elapsed
-        minimax([None,root], depth, whose=root.whose_move, times=(cur_time, remaining))
+        timeout(minimax, args=([None,root], depth), kwargs = {'whose':root.whose_move,'times':(cur_time, remaining)},timeout_duration=remaining)
         # if float(remaining) / elapsed < 1.7:
-        if remaining < 2:
-            canidate_state = None
-            if root.whose_move == WHITE:
-                canidate_state = max(MoveTree[roothash], key=lambda s: s[0])[1]
-            else:
-                canidate_state = min(MoveTree[roothash], key=lambda s: s[0])[1]
-            newRemark = "Your Move!"
-            # print(canidate_state)
-            # print([s[0] for s in MoveTree[roothash]])
-            # print(zhash(canidate_state))
-
-            return  [[canidate_state.move_description, canidate_state], newRemark]
-    # print([s[0] for s in MoveTree[roothash]])
+        cur_time = time.time()
+        elapsed = cur_time - last_iter_time
+        last_iter_time = cur_time
+        remaining -= elapsed
+        print("Time remaining: %s" % remaining)
+        if remaining < 0:
+            break
     canidate_state = None
+    print("Max ply reached: %s" % max_ply_reached)
+    # print([s[0] for s in MoveTree[roothash]])
     if root.whose_move == WHITE:
         canidate_state = max(MoveTree[roothash], key=lambda s: s[0])[1]
     else:
@@ -287,23 +285,43 @@ def can_move(state, start, end):
         return False
     if e_code != 0 and state.whose_move == who(e_code): #can't move into space occupied by ur own piece.
         return False
-    if is_frozen(state, start):
+    if is_frozen(state, start) or (piece.lower() != 'i' and is_frozen(state, end)):
+        return False
+    if is_coordinated(state, end):
         return False
     piece = piece.lower()
     return can_move_piece(state, start, end, piece=piece)
 
+def is_coordinated(state, loc):
+    me = state.whose_move
+    for i,vi in enumerate(state.board):
+        for j, vj in enumerate(vi):
+            if who(vj) != me and vj in [13,14]: k_idx = [i, j]
+            if who(vj) != me and vj in [4,5]: c_idx = [i, j]
+
+    dr = k_idx[0] - c_idx[0]
+    dc = k_idx[1] - c_idx[1]
+    if (k_idx[0] - dr,k_idx[1]) == loc or (k_idx[0],k_idx[1] - dc) == loc:
+        return True
+    return False
+
 def is_frozen(state, start):
     surrounding_space_deltas = itertools.product([-1,0,1],[-1,0,1])
+    piece_who = who(state.board[start[0]][start[1]])
     for dr, dc in surrounding_space_deltas:
         if dr == dc and dr == 0:
             continue
         try:
-            adj_code = state.board[start[0] + dr][start[1] + dc]
-            if CODE_TO_INIT[adj_code].lower() == 'f' and who(adj_code) != state.whose_move:
-                return True
-            elif CODE_TO_INIT[adj_code].lower() == 'i' and who(adj_code) != state.whose_move:
-                adj_loc = [start[0] + dr,start[1] + dc]
-                return is_frozen(state,adj_loc)
+            adj_x = start[0] + dr
+            adj_y = start[1] + dc
+            # print("Withdrawing from %s, %s" % (withdrawn_x,withdrawn_y))
+            if adj_x >= 0 and adj_y >= 0:
+                adj_code = state.board[start[0] + dr][start[1] + dc]
+                if CODE_TO_INIT[adj_code].lower() == 'f' and who(adj_code) != piece_who:
+                    return True
+                elif CODE_TO_INIT[adj_code].lower() == 'i' and who(adj_code) != piece_who:
+                    adj_loc = [start[0] + dr,start[1] + dc]
+                    return is_frozen(state,adj_loc)
         except IndexError:
             pass
     return False
@@ -340,7 +358,7 @@ def can_move_linear(state, start, end, jumps=0):
             col_index = int(col_index)
             col = row[col_index]
             if CODE_TO_INIT[col] != '-':
-                if jumps > 0:
+                if jumps > 0 and state.whose_move != who(col):
                     jumps -= 1
                 else:
                     return False
@@ -523,9 +541,13 @@ def move_withdrawer(state, start, end):
     r_dir = int((r_dif * -1) / r_dif) if r_dif != 0 else 0
     c_dir = int((c_dif * -1) / c_dif) if c_dif != 0 else 0
     try:
-        piece = state.board[start[0] + r_dir][start[1] + c_dir]
-        if who(piece) != state.whose_move:
-            state.board[start[0] + r_dir][start[1] + c_dir] = 0
+        withdrawn_x = start[0] + r_dir
+        withdrawn_y = start[1] + c_dir
+        # print("Withdrawing from %s, %s" % (withdrawn_x,withdrawn_y))
+        if withdrawn_x >= 0 and withdrawn_y >= 0:
+            piece = state.board[withdrawn_x][withdrawn_y]
+            if who(piece) != state.whose_move:
+                state.board[start[0] + r_dir][start[1] + c_dir] = 0
     except IndexError:
         pass
     # surrounding_space_deltas = itertools.product([-1,0,1],[-1,0,1])
@@ -559,6 +581,7 @@ def move_imitator(state, start, end):
         if k in ['i', '-', 'f']:
             continue
         if can_move_piece(state, start, end, piece=k):
+            # print("moving imitator like %s" % k)
             return move_piece(state, start, end, piece=k)
     return state
 
@@ -614,3 +637,40 @@ def test_starting_board():
 
 
 
+import sys
+import time
+from traceback import print_exc
+def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
+    '''This function will spawn a thread and run the given function using the args, kwargs and
+    return the given default value if the timeout_duration is exceeded
+    '''
+    import threading
+    class PlayerThread(threading.Thread):
+        def __init__(self):
+            threading.Thread.__init__(self)
+            self.result = default
+        def run(self):
+            try:
+                self.result = func(*args, **kwargs)
+            except:
+                print("Seems there was a problem with the time.")
+                print_exc()
+                self.result = default
+
+    pt = PlayerThread()
+    pt.start()
+    started_at = time.time()
+    pt.join(timeout_duration)
+    ended_at = time.time()
+    diff = ended_at - started_at
+    print("Time used in minimax: %0.4f seconds out of " % diff, timeout_duration)
+    if pt.isAlive():
+        print("Took too long. to do next ply")
+        # print("We are now terminating the game.")
+        # print("Player "+PLAYER_MAP[CURRENT_PLAYER]+" loses.")
+        # if USE_HTML: gameToHTML.reportResult("Player "+PLAYER_MAP[CURRENT_PLAYER]+" took too long (%04f seconds) and thus loses." % diff)
+        # if USE_HTML: gameToHTML.endHTML()
+        # exit()
+    else:
+        print("Within the time limit -- nice!")
+        # return pt.result
