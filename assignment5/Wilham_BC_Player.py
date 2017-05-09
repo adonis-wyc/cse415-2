@@ -7,6 +7,8 @@ import math
 import time
 import itertools
 import statistics
+from multiprocessing.pool import ThreadPool as Pool
+
 MoveTree = defaultdict(list)
 
 # Constants
@@ -153,9 +155,14 @@ def nickname():
     return "Wilham"
 
 def introduce():
+
     return "I'm Wilham, I was created by William Menten-Weil (wtmenten) and Graham Kelly (grahamtk) to play in a Baroque Chess tournament."
 
 def prepare(player2Nickname):
+    root = BC_state(INITIAL, WHITE)
+    depth = 1
+    remaining = 20
+    timeout(minimax, args=([None,root], depth), kwargs = {'whose':root.whose_move},timeout_duration=remaining)
     return "Hello %s. Let's begin." % player2Nickname
     # pass
 
@@ -177,6 +184,11 @@ def prepare(player2Nickname):
 #                         MoveTree[zhash(state.board)].append(new)
 #                         idfs(new, cut-1)
 
+def check_op(op, state):
+    if op.precond(state[1]):
+        new = op.state_transf(state[1])
+        MoveTree[zhash(state[1])].append([staticEval(state[1]),new])
+
 def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
     alphabeta = alphabeta[:]
     if depth < 1: # this is a leaf node
@@ -184,15 +196,13 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
         state[0] = cost
         return cost
     else: # this is not a leaf node
-        # MoveTree[zhash(state[1])] = []
         if zhash(state[1]) not in MoveTree:
             for x, row in enumerate(state[1].board):
                 for y, col in enumerate(row):
                     piece = CODE_TO_INIT[col]
+
                     for op in OPERATORS:
-                        if op.precond(state[1]):
-                            new = op.state_transf(state[1])
-                            MoveTree[zhash(state[1])].append([staticEval(state[1]),new])
+                        check_op(op,state)
         # else:
             # pass
             # print("State existed")
@@ -204,7 +214,7 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
                 MoveTree[zhash(state[1])][ci][0] = v
                 alpha = max(alphabeta[0], v)
                 alphabeta[0] = alpha
-                if alphabeta[1] < alphabeta[0]:
+                if alphabeta[1] <= alphabeta[0]:
                     print("pruned")
                     break
             print("saving value %s" % v)
@@ -218,7 +228,7 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
                 MoveTree[zhash(state[1])][ci][0] = v
                 beta = min(alphabeta[1], v)
                 alphabeta[1] = beta
-                if alphabeta[1] < alphabeta[0]:
+                if alphabeta[1] <= alphabeta[0]:
                     print("pruned")
                     break
             print("saving value %s" % v)
@@ -291,8 +301,44 @@ def can_move(state, start, end):
         return False
     if is_coordinated(state, end):
         return False
+    if is_leapable(state, end):
+        return False
     piece = piece.lower()
     return can_move_piece(state, start, end, piece=piece)
+
+def is_leapable(state, loc):
+    me = state.whose_move
+    #check if x axis is leapable
+    #check if y axis is leapable
+    row = [c for c in state.board[loc[0]]]
+    col = [c[loc[1]] for c in state.board]
+
+
+    leaper_indexes = [i for i,p in enumerate(row) if i != CODE_TO_INIT[p].lower() == 'l' and who(p) != me]
+    if len(leaper_indexes) > 0: # check x axis
+        adjs = [to_piece(state, [loc[0]+d, loc[1]])[0] != 0 for d in [-1,1] if -1 < loc[0]+d < 8]
+        if any(adjs) or len(adjs) != 0:
+            return False
+        leaper = leaper_indexes[0]
+        if leaper > loc[0]:
+            if any( p != 0 for p in row[loc[0]:leaper]):
+                return False
+        else:
+            if any( p != 0 for p in row[leaper:loc[0]]):
+                return False
+    leaper_indexes = [i for i,p in enumerate(col) if i != CODE_TO_INIT[p].lower() == 'l' and who(p) != me]
+    if len(leaper_indexes) > 0: # check y axis
+        adjs = [to_piece(state, [loc[0], loc[1]+d])[0] != 0 for d in [-1,1] if -1 < loc[1]+d < 8]
+        if any(adjs) or len(adjs) != 0:
+            return False
+        leaper = leaper_indexes[0]
+        if leaper > loc[1]:
+            if any( p != 0 for p in col[loc[1]:leaper]):
+                return False
+        else:
+            if any( p != 0 for p in col[leaper:loc[1]]):
+                return False
+
 
 def is_coordinated(state, loc):
     me = state.whose_move
@@ -427,7 +473,7 @@ def can_move_king(state, start, end,as_imitator=False):
     if x_dif > 1 or y_dif > 1:
         return False
     if as_imitator:
-        if to_piece(state, state)[1].lower() != 'k':
+        if to_piece(state, start)[1].lower() != 'k':
             return False
 
     # if CODE_TO_INIT[state.board[end[0]][end[1]]] != '-':
