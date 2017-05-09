@@ -425,7 +425,7 @@ def can_move_linear(state, start, end, jumps=0,as_imitator=False):
                         return False
                     jumps -= 1
                     if jumps == 0:
-                        if row_dist != x_dif - 1:
+                        if col_dist != x_dif - 1:
                             return False
                 else:
                     return False
