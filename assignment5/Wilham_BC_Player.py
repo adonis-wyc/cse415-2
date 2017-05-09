@@ -335,7 +335,7 @@ def is_coordinated(state, loc):
     k_idx, c_idx = None, None
     for i,vi in enumerate(state.board):
         for j, vj in enumerate(vi):
-            if who(vj) != me and vj in [13,14]: k_idx = [i, j]
+            if who(vj) != me and vj in [12,13]: k_idx = [i, j]
             if who(vj) != me and vj in [4,5]: c_idx = [i, j]
     if k_idx is not None and c_idx is not None:
         dr = k_idx[0] - c_idx[0]
@@ -671,7 +671,7 @@ def move_coordinator(state, start, end):
     me = state.whose_move
     for i,vi in enumerate(state.board):
         for j, vj in enumerate(vi):
-            if who(vj) == me and vj in [13,14]: k_idx = [i, j]
+            if who(vj) == me and vj in [12,13]: k_idx = [i, j]
     dr = k_idx[0] - end[0]
     dc = k_idx[1] - end[1]
     if (k_idx[0] - dr) >= 0 and who(state.board[k_idx[0] - dr][k_idx[1]]) != me:
