@@ -1,0 +1,4 @@
+Baroque Chess Gamemaster v1.0-BETA
+The Gamemaster says, "Players, introduce yourselves."
+     (Playing WHITE:) I'm Wilham, I was created by William Menten-Weil (wtmenten) and Graham Kelly (grahamtk) to play in a Baroque Chess tournament.
+     (Playing BLACK:) I'm Wilham, I was created by William Menten-Weil (wtmenten) and Graham Kelly (grahamtk) to play in a Baroque Chess tournament.

@@ -421,7 +421,12 @@ def can_move_linear(state, start, end, jumps=0,as_imitator=False):
             col = row[col_index]
             if CODE_TO_INIT[col] != '-':
                 if jumps > 0 and state.whose_move != who(col):
+                    if as_imitator and CODE_TO_INIT[col].lower() != 'l':
+                        return False
                     jumps -= 1
+                    if jumps == 0:
+                        if row_dist != x_dif - 1:
+                            return False
                 else:
                     return False
         return True
