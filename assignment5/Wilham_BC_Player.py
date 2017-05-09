@@ -114,7 +114,7 @@ def makeMove(currentState, currentRemark, timelimit):
     root = currentState
 
     roothash = zhash(root)
-    print('Hash of received state %d' % roothash)
+    # print('Hash of received state %d' % roothash)
     inital_depth = 1
     max_depth = 15
     timelimit = timelimit - 3
