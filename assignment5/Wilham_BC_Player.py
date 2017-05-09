@@ -671,7 +671,7 @@ def move_coordinator(state, start, end):
     dc = k_idx[1] - end[1]
     if (k_idx[0] - dr) >= 0 and who(state.board[k_idx[0] - dr][k_idx[1]]) != me:
         state.board[k_idx[0] - dr][k_idx[1]] = 0
-    if (k_idx[1] - dc) >= 0 who(state.board[k_idx[0]][k_idx[1] - dc]) != me:
+    if (k_idx[1] - dc) >= 0 and who(state.board[k_idx[0]][k_idx[1] - dc]) != me:
         state.board[k_idx[0]][k_idx[1] - dc] = 0
     return state
 
