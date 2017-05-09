@@ -7,7 +7,6 @@ import math
 import time
 import itertools
 import statistics
-from multiprocessing.pool import ThreadPool as Pool
 
 MoveTree = defaultdict(list)
 
@@ -133,17 +132,17 @@ def makeMove(currentState, currentRemark, timelimit):
         elapsed = cur_time - last_iter_time
         last_iter_time = cur_time
         remaining -= elapsed
-        print("Time remaining: %s" % remaining)
+        # print("Time remaining: %s" % remaining)
         if remaining < 0:
             break
     canidate_state = None
-    print("Max ply reached: %s" % max_ply_reached)
+    # print("Max ply reached: %s" % max_ply_reached)
     if root.whose_move == WHITE:
         canidate_state = max([x for x in MoveTree[roothash] if x[0] is not None], key=lambda s: s[0])
     else:
         canidate_state = min([x for x in MoveTree[roothash] if x[0] is not None], key=lambda s: s[0])
-    print("Avg heur Val: %s" % statistics.mean([x[0] for x in MoveTree[roothash]]))
-    print("State Heur Val: %s" % canidate_state[0])
+    # print("Avg heur Val: %s" % statistics.mean([x[0] for x in MoveTree[roothash]]))
+    # print("State Heur Val: %s" % canidate_state[0])
     canidate_state = canidate_state[1]
     newRemark = "Your Move!"
     # print('Turn at end of makemove %s' % currentState.whose_move)
@@ -155,7 +154,6 @@ def nickname():
     return "Wilham"
 
 def introduce():
-
     return "I'm Wilham, I was created by William Menten-Weil (wtmenten) and Graham Kelly (grahamtk) to play in a Baroque Chess tournament."
 
 def prepare(player2Nickname):
@@ -203,9 +201,6 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
 
                     for op in OPERATORS:
                         check_op(op,state)
-        # else:
-            # pass
-            # print("State existed")
         if whose == WHITE: # Max move
             v = -1*float('inf')
             for ci,child in enumerate(sorted(MoveTree[zhash(state[1])], key=lambda x: x[0], reverse=True)):
@@ -215,23 +210,18 @@ def minimax(state,depth, whose=None, alphabeta=[-1*float('inf'), float('inf')]):
                 alpha = max(alphabeta[0], v)
                 alphabeta[0] = alpha
                 if alphabeta[1] <= alphabeta[0]:
-                    print("pruned")
                     break
-            print("saving value %s" % v)
             return v
         else: # Min move
             v = float('inf')
             for ci,child in enumerate(sorted(MoveTree[zhash(state[1])], key=lambda x: x[0], reverse=False)):
                 sub_cost = minimax(child, depth-1, whose=WHITE, alphabeta=alphabeta)
                 v = min(v, sub_cost)
-                # print("saving value %s" % v)
                 MoveTree[zhash(state[1])][ci][0] = v
                 beta = min(alphabeta[1], v)
                 alphabeta[1] = beta
                 if alphabeta[1] <= alphabeta[0]:
-                    print("pruned")
                     break
-            print("saving value %s" % v)
             return v
 
 def staticEval(state):
@@ -773,7 +763,7 @@ def timeout(func, args=(), kwargs={}, timeout_duration=1, default=None):
             try:
                 self.result = func(*args, **kwargs)
             except:
-                print("Seems there was a problem with the time.")
+                # print("Seems there was a problem with the time.")
                 print_exc()
                 self.result = default
 
