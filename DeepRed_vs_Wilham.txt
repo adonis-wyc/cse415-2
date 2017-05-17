@@ -1,0 +1,265 @@
+Baroque Chess Gamemaster v1.0-BETA
+The Gamemaster says, "Players, introduce yourselves."
+     (Playing WHITE:) My name is Deep Red. I was programmed by Jimmy Lau and Jesse Rivera, whom you can contact at jlau18@uw.edu and jir682@uw.edu (respectively).
+     (Playing BLACK:) I'm Wilham, I was created by William Menten-Weil (wtmenten) and Graham Kelly (grahamtk) to play in a Baroque Chess tournament.
+The Gamemaster says, "Let's Play!"
+The initial state is...
+c l i w k i l f 
+p p p p p p p p 
+- - - - - - - - 
+- - - - - - - - 
+- - - - - - - - 
+- - - - - - - - 
+P P P P P P P P 
+F L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 1.9997 seconds out of  25
+Within the time limit -- nice!
+Turn 1: Move is by WHITE as 
+DeepRed says: Your move!
+c l i w k i l f 
+p p p p p p p p 
+- - - - - - P - 
+- - - - - - - - 
+- - - - - - - - 
+- - - - - - - - 
+P P P P P P - P 
+F L I W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.0159 seconds out of  25
+Within the time limit -- nice!
+Turn 2: Move is by BLACK as Pincer from H2 to H5
+Wilham says: Your Move!
+c l i w k i l f 
+p p p p p p p - 
+- - - - - - P - 
+- - - - - - - - 
+- - - - - - - p 
+- - - - - - - - 
+P P P P P P - P 
+F L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 2.0069 seconds out of  25
+Within the time limit -- nice!
+Turn 3: Move is by WHITE as 
+DeepRed says: Your move!
+c l i w k i l f 
+p p p p p p p - 
+- - - - P - P - 
+- - - - - - - - 
+- - - - - - - p 
+- - - - - - - - 
+P P P P - P - P 
+F L I W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.0194 seconds out of  25
+Within the time limit -- nice!
+Turn 4: Move is by BLACK as Freezer from H1 to H3
+Wilham says: Your Move!
+c l i w k i l - 
+p p p p p p p - 
+- - - - P - P f 
+- - - - - - - - 
+- - - - - - - p 
+- - - - - - - - 
+P P P P - P - P 
+F L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 1.9756 seconds out of  25
+Within the time limit -- nice!
+Turn 5: Move is by WHITE as 
+DeepRed says: Your move!
+c l i w k i l - 
+p p p p p p p - 
+- - P - P - P f 
+- - - - - - - - 
+- - - - - - - p 
+- - - - - - - - 
+P P - P - P - P 
+F L I W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.0245 seconds out of  25
+Within the time limit -- nice!
+Turn 6: Move is by BLACK as Freezer from H3 to F5
+Wilham says: Your Move!
+c l i w k i l - 
+p p p p p p p - 
+- - P - P - P - 
+- - - - - - - - 
+- - - - - f - p 
+- - - - - - - - 
+P P - P - P - P 
+F L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 1.9826 seconds out of  25
+Within the time limit -- nice!
+Turn 7: Move is by WHITE as 
+DeepRed says: Your move!
+c l i w k i l - 
+p p p p p p p - 
+- - P - P - P - 
+- - - - - - - - 
+- P - - - f - p 
+- - - - - - - - 
+P - - P - P - P 
+F L I W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.0286 seconds out of  25
+Within the time limit -- nice!
+Turn 8: Move is by BLACK as Pincer from D2 to D5
+Wilham says: Your Move!
+c l i w k i l - 
+p p p - p p p - 
+- - P - P - P - 
+- - - - - - - - 
+- P - p - f - p 
+- - - - - - - - 
+P - - P - P - P 
+F L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 1.9424 seconds out of  25
+Within the time limit -- nice!
+Turn 9: Move is by WHITE as 
+DeepRed says: Your move!
+c l i w k i l - 
+p p p - p p p - 
+- - P - P - P - 
+- - - - - - - - 
+- P - p - f - p 
+- - F - - - - - 
+P - - P - P - P 
+- L I W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.0467 seconds out of  25
+Within the time limit -- nice!
+Turn 10: Move is by BLACK as Leaper from G1 to H1
+Wilham says: Your Move!
+c l i w k i - l 
+p p p - p p p - 
+- - P - P - P - 
+- - - - - - - - 
+- P - p - f - p 
+- - F - - - - - 
+P - - P - P - P 
+- L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 2.0278 seconds out of  25
+Within the time limit -- nice!
+Turn 11: Move is by WHITE as 
+DeepRed says: Your move!
+c l i w k i - l 
+p p p - p p p - 
+- P - - P - P - 
+- - - - - - - - 
+- P - p - f - p 
+- - F - - - - - 
+P - - P - P - P 
+- L I W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.0577 seconds out of  25
+Within the time limit -- nice!
+Turn 12: Move is by BLACK as Imitator from C1 to D2
+Wilham says: Your Move!
+c l - w k i - l 
+p p p i p p p - 
+- P - - P - P - 
+- - - - - - - - 
+- P - p - f - p 
+- - F - - - - - 
+P - - P - P - P 
+- L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 2.0825 seconds out of  25
+Within the time limit -- nice!
+Turn 13: Move is by WHITE as 
+DeepRed says: Your move!
+c l - w k i - l 
+p p p i p p p - 
+- P F - P - P - 
+- - - - - - - - 
+- P - p - f - p 
+- - - - - - - - 
+P - - P - P - P 
+- L I W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.0240 seconds out of  25
+Within the time limit -- nice!
+Turn 14: Move is by BLACK as Leaper from B1 to C1
+Wilham says: Your Move!
+c - l w k i - l 
+p p p i p p p - 
+- P F - P - P - 
+- - - - - - - - 
+- P - p - f - p 
+- - - - - - - - 
+P - - P - P - P 
+- L I W K I L C 
+WHITE's move
+
+Time used in makeMove: 2.0313 seconds out of  25
+Within the time limit -- nice!
+Turn 15: Move is by WHITE as 
+DeepRed says: Your move!
+c - l w k i - l 
+p p p i p p p - 
+- P F - P - P - 
+- - I - - - - - 
+- P - p - f - p 
+- - - - - - - - 
+P - - P - P - P 
+- L - W K I L C 
+BLACK's move
+
+Time used in makeMove: 22.2140 seconds out of  25
+Within the time limit -- nice!
+Turn 16: Move is by BLACK as Coordinator from A1 to B1
+Wilham says: Your Move!
+- c l w k i - l 
+p p p i p p p - 
+- P F - P - P - 
+- - I - - - - - 
+- P - p - f - p 
+- - - - - - - - 
+P - - P - P - P 
+- L - W K I L C 
+WHITE's move
+
+Time used in makeMove: 2.0796 seconds out of  25
+Within the time limit -- nice!
+Illegal move by WHITE as 
+Returned state is:
+- c l w k i - l 
+p p p i p p p - 
+- P - F P - P - 
+- - I - - - - - 
+- P - p - f - p 
+- - - - - - - - 
+P - - P - P - P 
+- L - W K I L C 
+BLACK's move
+
+- c l w k i - l 
+p p p i p p p - 
+- P - F P - P - 
+- - I - - - - - 
+- P - p - f - p 
+- - - - - - - - 
+P - - P - P - P 
+- L - W K I L C 
+BLACK's move
+
+Game over.

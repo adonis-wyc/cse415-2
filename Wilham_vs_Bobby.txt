@@ -14,7 +14,7 @@ P P P P P P P P
 F L I W K I L C 
 WHITE's move
 
-Time used in makeMove: 22.0111 seconds out of  25
+Time used in makeMove: 21.9964 seconds out of  25
 Within the time limit -- nice!
 Turn 1: Move is by WHITE as Pincer from B7 to B3
 Wilham says: Your Move!
@@ -28,7 +28,7 @@ P - P P P P P P
 F L I W K I L C 
 BLACK's move
 
-Time used in makeMove: 24.9461 seconds out of  25
+Time used in makeMove: 24.8793 seconds out of  25
 Within the time limit -- nice!
 Turn 2: Move is by BLACK as I moved!
 Bobby F. says: Your turn!
@@ -42,7 +42,7 @@ P - P P P P P P
 F L I W K I L C 
 WHITE's move
 
-Time used in makeMove: 22.0115 seconds out of  25
+Time used in makeMove: 22.0744 seconds out of  25
 Within the time limit -- nice!
 Turn 3: Move is by WHITE as Leaper from B8 to B4
 Wilham says: Your Move!
@@ -56,7 +56,7 @@ P - P P P P P P
 F - I W K I L C 
 BLACK's move
 
-Time used in makeMove: 24.9405 seconds out of  25
+Time used in makeMove: 24.8973 seconds out of  25
 Within the time limit -- nice!
 Turn 4: Move is by BLACK as I moved!
 Bobby F. says: Your turn!
@@ -70,70 +70,189 @@ P - P P P P P P
 F - I W K I L C 
 WHITE's move
 
-Time used in makeMove: 22.0236 seconds out of  25
+Time used in makeMove: 22.0461 seconds out of  25
 Within the time limit -- nice!
-Turn 5: Move is by WHITE as Pincer from A7 to A4
+Turn 5: Move is by WHITE as Pincer from B3 to A3
 Wilham says: Your Move!
 c l i w k i l f 
 p p p p - p p p 
-- P - - p - - - 
-P L - - - - - - 
+P - - - p - - - 
+- L - - - - - - 
 - - - - - - - - 
+- - - - - - - - 
+P - P P P P P P 
+F - I W K I L C 
+BLACK's move
+
+Time used in makeMove: 24.9770 seconds out of  25
+Within the time limit -- nice!
+Turn 6: Move is by BLACK as I moved!
+Bobby F. says: Your turn!
+c l i w k i l f 
+p p p p - - p p 
+P - - - p - - - 
+- L - - - - - - 
+- - - - - p - - 
+- - - - - - - - 
+P - P P P P P P 
+F - I W K I L C 
+WHITE's move
+
+Time used in makeMove: 22.1226 seconds out of  25
+Within the time limit -- nice!
+Turn 7: Move is by WHITE as Pincer from A7 to A4
+Wilham says: Your Move!
+c l i w k i l f 
+p p p p - - p p 
+P - - - p - - - 
+P L - - - - - - 
+- - - - - p - - 
 - - - - - - - - 
 - - P P P P P P 
 F - I W K I L C 
 BLACK's move
 
-Time used in makeMove: 24.9644 seconds out of  25
+Time used in makeMove: 24.8217 seconds out of  25
 Within the time limit -- nice!
-Turn 6: Move is by BLACK as I moved!
+Turn 8: Move is by BLACK as I moved!
+Bobby F. says: Your turn!
+c l i w k i l f 
+p p p p - - p p 
+P - - - - - - - 
+P L - - - - - - 
+- - - - p p - - 
+- - - - - - - - 
+- - P P P P P P 
+F - I W K I L C 
+WHITE's move
+
+Time used in makeMove: 22.0463 seconds out of  25
+Within the time limit -- nice!
+Turn 9: Move is by WHITE as Pincer from A3 to B3
+Wilham says: Your Move!
+c l i w k i l f 
+p p p p - - p p 
+- P - - - - - - 
+P L - - - - - - 
+- - - - p p - - 
+- - - - - - - - 
+- - P P P P P P 
+F - I W K I L C 
+BLACK's move
+
+Time used in makeMove: 24.9225 seconds out of  25
+Within the time limit -- nice!
+Turn 10: Move is by BLACK as I moved!
+Bobby F. says: Your turn!
+c l i w k i l f 
+p p p p - - p p 
+- P - - - - - - 
+P L - - - - - - 
+- p - - - p - - 
+- - - - - - - - 
+- - P P P P P P 
+F - I W K I L C 
+WHITE's move
+
+Time used in makeMove: 22.0485 seconds out of  25
+Within the time limit -- nice!
+Turn 11: Move is by WHITE as Pincer from E7 to E2
+Wilham says: Your Move!
+c l i w k i l f 
+p p p p P - p p 
+- P - - - - - - 
+P L - - - - - - 
+- p - - - p - - 
+- - - - - - - - 
+- - P P - P P P 
+F - I W K I L C 
+BLACK's move
+
+Time used in makeMove: 24.9156 seconds out of  25
+Within the time limit -- nice!
+Turn 12: Move is by BLACK as I moved!
 Bobby F. says: Your turn!
 c l i w k i l f 
 p p p p - p p p 
 - P - - - - - - 
 P L - - - - - - 
-- - - - p - - - 
+- p - - - - - - 
 - - - - - - - - 
-- - P P P P P P 
+- - P P - P P P 
 F - I W K I L C 
 WHITE's move
 
-Time used in makeMove: 22.0187 seconds out of  25
+Time used in makeMove: 22.1426 seconds out of  25
 Within the time limit -- nice!
-Turn 7: Move is by WHITE as Pincer from C7 to C3
+Turn 13: Move is by WHITE as Leaper from B4 to B6
 Wilham says: Your Move!
 c l i w k i l f 
 p p p p - p p p 
-- P P - - - - - 
-P L - - - - - - 
-- - - - p - - - 
+- P - - - - - - 
+P - - - - - - - 
 - - - - - - - - 
-- - - P P P P P 
+- L - - - - - - 
+- - P P - P P P 
 F - I W K I L C 
 BLACK's move
 
-Time used in makeMove: 24.9884 seconds out of  25
+Time used in makeMove: 24.8017 seconds out of  25
 Within the time limit -- nice!
-Illegal move by BLACK as I moved!
-Returned state is:
-c l i w k - l f 
-p p p p - p p p 
+Turn 14: Move is by BLACK as I moved!
+Bobby F. says: Your turn!
+c l i w k i l f 
+p p p p - - p p 
 - P - - - - - - 
-P L i - - - - - 
-- - - - p - - - 
-- - - - - - - - 
-- - - P P P P P 
+P - - - - - - - 
+- - - - - p - - 
+- L - - - - - - 
+- - P P - P P P 
 F - I W K I L C 
 WHITE's move
 
+Time used in makeMove: 22.0197 seconds out of  25
+Within the time limit -- nice!
+Turn 15: Move is by WHITE as Leaper from B6 to F2
+Wilham says: Your Move!
 c l i w k i l f 
-p p p p - p p p 
-- P P - - - - - 
-P L - - - - - - 
-- - - - p - - - 
+p p p p - L p p 
+- P - - - - - - 
+P - - - - - - - 
+- - - - - p - - 
 - - - - - - - - 
-- - - P P P P P 
+- - P P - P P P 
 F - I W K I L C 
 BLACK's move
 
-Game over.
+Time used in makeMove: 24.9582 seconds out of  25
+Within the time limit -- nice!
+Turn 16: Move is by BLACK as I moved!
+Bobby F. says: Your turn!
+c l i w k i l f 
+p p p - p - p p 
+- P - - - - - - 
+P - - - - - - - 
+- - - - - p - - 
+- - - - - - - - 
+- - P P - P P P 
+F - I W K I L C 
+WHITE's move
+
+Time used in makeMove: 22.1626 seconds out of  25
+Within the time limit -- nice!
+Turn 17: Move is by WHITE as Pincer from D7 to D2
+Wilham says: Your Move!
+c l i w k i l f 
+p p p P p - p p 
+- P - - - - - - 
+P - - - - - - - 
+- - - - - p - - 
+- - - - - - - - 
+- - P - - P P P 
+F - I W K I L C 
+BLACK's move
+
+Time used in makeMove: 25.3431 seconds out of  25
+Took too long.
+We are now terminating the game.
+Player Wilham loses.

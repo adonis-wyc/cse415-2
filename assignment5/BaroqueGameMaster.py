@@ -19,8 +19,8 @@ if len(sys.argv) > 1:
     if len(sys.argv) > 3:
         TIME_PER_MOVE = float(sys.argv[3])
 else:
-    import Wilham_BC_Player as player1
-    import Bobby_BC_Player as player2
+    import Wilham_BC_Player as player2
+    import DeepRed_BC_Player as player1
 
 
 # Specify details of a match here:
