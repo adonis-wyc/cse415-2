@@ -67,9 +67,15 @@ def GW_QValues_string(Q_dict):
     return out_str
 
 
-def GW_Policy_string():
-    # IMPLEMENT THIS
-    pass
+def GW_Policy_string(policy):
+    out_str = ''
+    for row in range(2,-1,-1):
+        for col in range(4):
+            state_key = (col,row)
+            formated = " %s " % policy[state_key] if state_key in policy else 'NONE'
+            out_str += formated
+        out_str += '\n'
+    return out_str
 
 
 def test():
@@ -95,6 +101,7 @@ def test():
     grid_MDP.QLearning( 0.6, 100, 0.5)
     print(GW_QValues_string(grid_MDP.Q))
 
-    # print(GW_Policystring())
+    policy = grid_MDP.extractPolicy()
+    print(GW_Policy_string(policy))
 
 test()

@@ -170,5 +170,8 @@ class MDP:
 
 
     def extractPolicy(self):
-        # IMPLEMENT THIS
-        pass
+        self.optPolicy = {}
+        for s in self.known_states:
+            opt_val, opt_a = max([(self.Q[(s, a)], a) for a in self.actions])
+            self.optPolicy[s] = opt_a
+        return self.optPolicy
