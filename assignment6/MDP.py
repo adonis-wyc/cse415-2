@@ -28,7 +28,7 @@ import copy
 import itertools
 from collections import defaultdict
 
-REPORTING = True
+REPORTING = False
 
 class MDP:
     def __init__(self):
@@ -111,7 +111,6 @@ class MDP:
         self.known_states = set()
 
         self.bfsSearch(self.start_state)
-        print(self.known_states)
 
     def bfsSearch(self, s):
         self.known_states.add(s)
@@ -163,7 +162,7 @@ class MDP:
                 alpha = 1.0 / N[(s,cand_action)]
                 old_val = self.Q[(s,cand_action)]
                 self.Q[(s,cand_action)] = old_val + alpha * (cand_val - old_val)
-                print(cand_val)
+                REPORTING = False
                 self.take_action(cand_action)
                 # self.current_state =
         # print(self.Q)
