@@ -98,7 +98,7 @@ def test():
     grid_MDP.valueIteration( 0.6, 15)
     print(GW_Values_string(grid_MDP.V))
 
-    grid_MDP.QLearning( 0.6, 100, 0.5)
+    grid_MDP.QLearning( 0.6, 6000, 0.95)
     print(GW_QValues_string(grid_MDP.Q))
 
     policy = grid_MDP.extractPolicy()

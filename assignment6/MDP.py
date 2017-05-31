@@ -93,7 +93,6 @@ class MDP:
                             "; reward is "+str(r))
 
     def assess_action(self, s, a):
-        # s = self.current_state
         neighbors = self.state_neighbors(s)
         threshold = 0.0
         rnd = random.uniform(0.0, 1.0)
@@ -107,16 +106,12 @@ class MDP:
         return s, r
 
     def generateAllStates(self):
-        # IMPLEMENT THIS
         self.known_states = set()
-
         self.bfsSearch(self.start_state)
 
     def bfsSearch(self, s):
         self.known_states.add(s)
         neighbors = self.state_neighbors(s)
-        # products = itertools.product(neighbors, self.actions)
-        # unexplored = [n,a for n,a in products if self.succ.get(n, False) == False]
         unexplored = [n for n in neighbors if self.succ.get(n, False) == False]
         if len(unexplored) == 0:
             return
@@ -134,11 +129,10 @@ class MDP:
                         for a in self.actions:
                             val =  self.T(s, a, n) * (discount*self.V[n] + self.R(s, a, n))
                             n_vals.append(val)
-                    max_val = max(n_vals) if len(n_vals) > 0 else self.V[s] # rock/dead has no neighbors
+                    max_val = max(n_vals) if len(n_vals) > 0 else self.V[s] # rock/end has no neighbors
                     self.V[s] =  max_val
 
     def QLearning(self, discount, nEpisodes, epsilon):
-        # IMPLEMENT THIS
         N = defaultdict(int)
         self.Q = defaultdict(int)
 
@@ -149,7 +143,13 @@ class MDP:
                 q_vals = []
                 for a in self.actions:
                     sp, r = self.assess_action(s, a)
+                    #using computed V values (rougher estimation of optimal next step but faster to compute)
                     val = (discount*self.V[sp] + r)
+
+                    # using prior iterations optimal Q value
+                    # best_next, act = max([(self.Q[(sp,act)], act) for act in self.actions], key=lambda x: x[0])
+                    # val = (discount*best_next + r)
+
                     q_vals.append((val, a, sp))
 
                 rand = random.random()
@@ -163,9 +163,7 @@ class MDP:
                 old_val = self.Q[(s,cand_action)]
                 self.Q[(s,cand_action)] = old_val + alpha * (cand_val - old_val)
                 REPORTING = False
-                self.take_action(cand_action)
-                # self.current_state =
-        # print(self.Q)
+                self.current_state = cand_sp
 
 
     def extractPolicy(self):
