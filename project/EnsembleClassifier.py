@@ -1,9 +1,18 @@
+'''
+EnsembleClassifier.py
+William Menten-Weil (wtmenten) & Graham Kelly (grahamtk)
+This is the main file for our interactive Ensemble classifier
+with K Fold cross validation and Bootstrap Aggregating
+
+Running this file as main will give you an interactive prompt
+'''
 import csv
 import random
 import itertools
 import sys, os, pickle
 import numpy as np
 import math
+from os import path
 import random
 from collections import defaultdict
 from sklearn import datasets
@@ -127,7 +136,7 @@ def main(dataset_name="iris", model_name='both', verbose=2, folds=10, ensemble_s
 
     if load_name != None:
         load_fail = False
-        file = os.getcwd()
+        file = path.dirname(path.abspath(__file__))
         file += '/saves/' + load_name + '.pickle'
         try:
             load_file = open(file, 'rb')
