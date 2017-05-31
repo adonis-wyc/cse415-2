@@ -322,5 +322,5 @@ def run_interactive():
     main(**program_kwargs)
 
 if __name__ == "__main__":
-    main(dataset_name='finance', verbose=1, load_name='finance1', save_name='finance1')
-    # run_interactive()
+    # main(dataset_name='finance', verbose=1, load_name='finance1', save_name='finance1')
+    run_interactive()
